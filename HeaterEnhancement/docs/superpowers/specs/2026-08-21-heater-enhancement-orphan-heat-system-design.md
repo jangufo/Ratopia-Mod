@@ -6,6 +6,8 @@
 
 当前 Mod 会在保存、读档、范围替换、加热器消失和拆除时清理 Buff，但运行时同步只维护加热器注册表，不审计全部活植物。异常产生且未包含在旧注册范围中的 `HeatSystem` 可以继续存在。
 
+真实程序集进一步确认了两个确定的泄漏入口：冬季 `Building_Update3()` 在 `WireCheck(true)` 失败时只播放停机动画，不调用 `BuildingWorkingStop()`；某格在供热后才被墙体阻挡时，`BuildingWorkingStop()` 会把它加入新的 `List_BlockPos`，并因此跳过该格的 `ApplyBuff(false)`。这两条路径都会让先前写入的 `HeatSystem` 留在已经不再实际供热的植物上。
+
 ## 方案比较
 
 1. 维护独立的“实际有效覆盖”注册表，并在相关生命周期事件后标记 dirty；只在 dirty 时审计带 `HeatSystem` 的活植物。该方案同时反映季节、激活、供电和墙体阻挡，避免稳定会话中的周期性全图扫描，作为本次采用方案。
@@ -28,8 +30,8 @@
 - 保留现有几何 `Coverage` 注册表用于范围替换和拆除时的局部清理；新增独立 `EffectiveCoverage` 注册表，不能混用两者语义。
 - `HeaterEffectiveCoverageCalculator` 以候选范围、阻挡格、季节、激活和供电状态生成稳定顺序的有效格，作为可脱离 Unity 测试的纯逻辑层。
 - `HeaterCoverageRegistry.CoversAny(IEnumerable<GridPoint>)` 提供多格植物的覆盖判断。
-- `HeaterRuntime` 在原版 `Building_Update` 完成后读取刚计算出的 `List_BlockPos` 并更新有效覆盖；`WireCheck` 失败、`BuildingWorkingStop`、停用、切季、拆除、加热器消失和会话重置时撤销对应有效覆盖并标记 dirty。这些事件只更新注册表和 dirty，不在单台加热器的中间状态立刻全量审计。
-- `RemoveOrphanedHeatSystemBuffs(...)` 只在 dirty 时遍历 `EnvironmentMgr.List_WorldObj`，只对带 `HeatSystem` 的植物调用 `GetSizeRect()`。`TickSafely` 在枚举并同步全部加热器、移除失踪加热器后消费一次；`ReapplyAllSeasonStates` 在 `WeatherMgr.SeasonState_Update` 或 `BuildingMgr.RefreshElecUseBuilding` 的 Postfix 中同步全部已跟踪加热器后消费一次。管理器不可用时保留 dirty，等待下一次有效批次。
+- `HeaterRuntime` 在原版 `Building_Update` 完成后读取刚计算出的 `List_BlockPos`，同时再次验证 `m_Activation` 和 `m_ElecNum == 1` 后更新有效覆盖；异常退出时撤销该加热器的有效覆盖。`WireCheck` 失败、`BuildingWorkingStop`、停用、切季、拆除、加热器消失和会话重置时也撤销对应有效覆盖并标记 dirty。这些事件只更新注册表和 dirty，不在单台加热器的中间状态立刻全量审计。
+- `RemoveOrphanedHeatSystemBuffs(...)` 只在 dirty 时遍历 `GameMgr.Instance._EnvMgr.List_WorldObj`，只对带 `HeatSystem` 的植物调用 `GetSizeRect()`。`TickSafely` 在枚举并同步全部加热器、移除失踪加热器后消费一次；`ReapplyAllSeasonStates` 在 `WeatherMgr.SeasonState_Update` 或 `BuildingMgr.RefreshElecUseBuilding` 的 Postfix 中同步全部已跟踪加热器后消费一次。管理器不可用时保留 dirty，等待下一次有效批次。
 - 仅在实际移除至少一个 Buff 时记录汇总日志，避免周期性刷屏。
 
 ## 测试与发布

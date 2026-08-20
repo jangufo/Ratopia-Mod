@@ -41,7 +41,7 @@
 - Modify: `README.md`
 
 **Interfaces:**
-- Consumes: `Building_Heater.List_LocalPos`, private `Building_Heater.List_BlockPos`, `Building.m_Activation`, `Building.m_ElecNum`, `EnvironmentMgr.List_WorldObj`, `WorldObject.GetSizeRect()`, `WorldObject.RemoveBuff(string)`.
+- Consumes: `Building_Heater.List_LocalPos`, private `Building_Heater.List_BlockPos`, `Building.m_Activation`, `Building.m_ElecNum`, `GameMgr._EnvMgr`, `EnvironmentMgr.List_WorldObj`, `WorldObject.GetSizeRect()`, `WorldObject.RemoveBuff(string)`.
 - Produces: `bool HeaterCoverageRegistry.CoversAny(IEnumerable<GridPoint> points)`, pure `HeaterEffectiveCoverageCalculator.Create(...)`, effective-coverage lifecycle hooks, and dirty-guarded private runtime audit `RemoveOrphanedHeatSystemBuffs(SeasonState season, EnvironmentMgr environmentManager)`.
 
 - [ ] **Step 1: Write failing pure-logic and assembly contract tests**
@@ -62,7 +62,7 @@ Expected: FAIL because the effective-coverage calculator, lifecycle hooks, dirty
 
 - [ ] **Step 3: Implement actual effective coverage and the event-driven audit**
 
-Implement `CoversAny` by returning true on the first registered point. Add a separate `EffectiveCoverage` registry. After a successful original `Building_Update`, register only cells allowed by winter, activation, power, and `List_BlockPos`; on failed wire checks, working stop, non-winter disable, demolition, missing heaters, or reset, unregister effective cells. These per-heater hooks only update state and dirty. Consume dirty once at the end of `TickSafely` after all heaters and missing IDs are synchronized, and once at the end of `ReapplyAllSeasonStates` after all tracked heaters are reapplied from the season/electricity-refresh Postfix. Iterate only live objects containing `HeatSystem`; remove it outside winter or when none of `GetSizeRect()` is effectively covered. Leave dirty set when managers are unavailable and log only a positive removal count.
+Implement `CoversAny` by returning true on the first registered point. Add a separate `EffectiveCoverage` registry. After a successful original `Building_Update`, register only cells allowed by winter, activation, power, and `List_BlockPos`; if original update throws, clear that heater's effective coverage. On failed wire checks, working stop, non-winter disable, demolition, missing heaters, or reset, unregister effective cells. These per-heater hooks only update state and dirty. Consume dirty once at the end of `TickSafely` after all heaters and missing IDs are synchronized, and once at the end of `ReapplyAllSeasonStates` after all tracked heaters are reapplied from the season/electricity-refresh Postfix. Iterate only live objects containing `HeatSystem` from `GameMgr.Instance._EnvMgr`; remove it outside winter or when none of `GetSizeRect()` is effectively covered. Leave dirty set when managers are unavailable and log only a positive removal count.
 
 - [ ] **Step 4: Update release metadata and documentation**
 
