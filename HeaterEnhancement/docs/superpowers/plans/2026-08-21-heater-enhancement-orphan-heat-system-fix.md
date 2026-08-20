@@ -4,7 +4,7 @@
 
 **Goal:** Prevent plants outside every registered heater range from retaining `HeatSystem` and growing during winter.
 
-**Architecture:** Extend the pure coverage registry with an any-cell query, then audit live plants from the existing throttled runtime coordinator. Keep original heater Buff application, wall blocking, power behavior, and save schema unchanged.
+**Architecture:** Keep geometric and actual-effective coverage in separate registries. Derive effective cells from the original heater's completed wall calculation plus winter, activation, and electricity state; mark a live-plant audit dirty only when relevant lifecycle state can invalidate coverage. Keep original heater Buff application, growth coroutines, and save schema unchanged.
 
 **Tech Stack:** C# 7.3, .NET Framework 4.7.2, BepInEx 5 Mono, Harmony 2.9.0, xUnit, Mono.Cecil, PowerShell.
 
@@ -15,6 +15,9 @@
 - Do not add custom save fields or persist derived `HeatSystem` state.
 - Do not patch plant growth coroutines or global `WorldObject.AddBuff`/`ResumeGrowing` behavior.
 - Preserve existing heater geometry, wall blocking, electricity rules, and package whitelist.
+- Never treat geometric 9x5 inclusion alone as proof of active heating.
+- Do not scan `EnvironmentMgr.List_WorldObj` on a fixed interval when no coverage-relevant state changed.
+- Do not claim interception of arbitrary third-party `HeatSystem` writes that trigger no known heater lifecycle event; the guaranteed repair points are initial session synchronization and coverage-invalidating events.
 - Do not start Ratopia; install only after confirming the process is closed.
 
 ---
@@ -23,8 +26,11 @@
 
 **Files:**
 - Modify: `src/HeaterEnhancement/Core/HeaterCoverageRegistry.cs`
+- Create: `src/HeaterEnhancement/Core/HeaterEffectiveCoverageCalculator.cs`
 - Modify: `src/HeaterEnhancement/Runtime/HeaterRuntime.cs`
+- Modify: `src/HeaterEnhancement/Patches/RuntimePatches.cs`
 - Modify: `tests/HeaterEnhancement.Tests/HeaterCoverageRegistryTests.cs`
+- Create: `tests/HeaterEnhancement.Tests/HeaterEffectiveCoverageCalculatorTests.cs`
 - Modify: `tests/HeaterEnhancement.Tests/PluginContractTests.cs`
 - Modify: `tests/HeaterEnhancement.Tests/GameContractTests.cs`
 - Modify: `src/HeaterEnhancement/Plugin.cs`
@@ -35,12 +41,12 @@
 - Modify: `README.md`
 
 **Interfaces:**
-- Consumes: `HeaterCoverageRegistry.Covers(GridPoint)`, `EnvironmentMgr.List_WorldObj`, `WorldObject.GetSizeRect()`, `WorldObject.RemoveBuff(string)`.
-- Produces: `bool HeaterCoverageRegistry.CoversAny(IEnumerable<GridPoint> points)` and private runtime audit `RemoveOrphanedHeatSystemBuffs(SeasonState season, EnvironmentMgr environmentManager)`.
+- Consumes: `Building_Heater.List_LocalPos`, private `Building_Heater.List_BlockPos`, `Building.m_Activation`, `Building.m_ElecNum`, `EnvironmentMgr.List_WorldObj`, `WorldObject.GetSizeRect()`, `WorldObject.RemoveBuff(string)`.
+- Produces: `bool HeaterCoverageRegistry.CoversAny(IEnumerable<GridPoint> points)`, pure `HeaterEffectiveCoverageCalculator.Create(...)`, effective-coverage lifecycle hooks, and dirty-guarded private runtime audit `RemoveOrphanedHeatSystemBuffs(SeasonState season, EnvironmentMgr environmentManager)`.
 
 - [ ] **Step 1: Write failing pure-logic and assembly contract tests**
 
-Add tests proving `CoversAny` is false for null/empty/all-outside points and true when any occupied point is covered. Add Mono.Cecil assertions that the runtime audit exists, reads `EnvironmentMgr.List_WorldObj`, calls `WorldObject.GetSizeRect`, calls `HeaterCoverageRegistry.CoversAny`, calls `WorldObject.RemoveBuff`, and is invoked from `TickSafely`. Update release-contract expectations to `0.1.3`.
+Add tests proving `CoversAny` is false for null/empty/all-outside points and true when any occupied point is covered. Add pure tests proving effective coverage is empty outside winter, while inactive, or without electricity; in active powered winter it excludes blocked cells, preserves order, and supports overlapping registry entries. Add Mono.Cecil assertions for the real fields, lifecycle hooks, two distinct registries, dirty guard, live-object audit, manager-unavailable dirty retention, destroyed-object guards, every invalidation event, no mid-batch audit, and `0.1.3` release contracts.
 
 - [ ] **Step 2: Run tests and verify RED**
 
@@ -52,11 +58,11 @@ dotnet test .\HeaterEnhancement.sln -c Release `
   /p:InstallAfterBuild=false
 ```
 
-Expected: FAIL because `CoversAny` and `RemoveOrphanedHeatSystemBuffs` do not exist and release metadata is still `0.1.2`.
+Expected: FAIL because the effective-coverage calculator, lifecycle hooks, dirty-guarded audit, and `0.1.3` metadata do not exist.
 
-- [ ] **Step 3: Implement the minimal runtime audit**
+- [ ] **Step 3: Implement actual effective coverage and the event-driven audit**
 
-Implement `CoversAny` by returning true on the first registered point. In `TickSafely`, after heater and season synchronization, iterate live plants containing `HeatSystem`; remove it when the season is not winter or none of `GetSizeRect()` is covered. Convert each occupied `Vector2` to a `GridPoint`; log only a positive removal count. Call the same audit after explicit season-state reapplication.
+Implement `CoversAny` by returning true on the first registered point. Add a separate `EffectiveCoverage` registry. After a successful original `Building_Update`, register only cells allowed by winter, activation, power, and `List_BlockPos`; on failed wire checks, working stop, non-winter disable, demolition, missing heaters, or reset, unregister effective cells. These per-heater hooks only update state and dirty. Consume dirty once at the end of `TickSafely` after all heaters and missing IDs are synchronized, and once at the end of `ReapplyAllSeasonStates` after all tracked heaters are reapplied from the season/electricity-refresh Postfix. Iterate only live objects containing `HeatSystem`; remove it outside winter or when none of `GetSizeRect()` is effectively covered. Leave dirty set when managers are unavailable and log only a positive removal count.
 
 - [ ] **Step 4: Update release metadata and documentation**
 
