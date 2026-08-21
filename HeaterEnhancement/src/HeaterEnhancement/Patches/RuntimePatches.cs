@@ -26,6 +26,25 @@ namespace HeaterEnhancement.Patches
             HeaterRuntime.DisableForNonWinter(__instance);
             return false;
         }
+
+        private static Exception Finalizer(
+            Building_Heater __instance,
+            bool __runOriginal,
+            Exception __exception)
+        {
+            try
+            {
+                HeaterRuntime.OnHeaterOperationException(
+                    __instance,
+                    __runOriginal,
+                    __exception);
+            }
+            catch
+            {
+            }
+
+            return __exception;
+        }
     }
 
     [HarmonyPatch(typeof(Building_Heater), nameof(Building_Heater.Building_Update))]
@@ -80,6 +99,25 @@ namespace HeaterEnhancement.Patches
         {
             HeaterRuntime.EnforceNonWinterWireResult(__instance, ref __result);
             HeaterRuntime.OnHeaterWireCheckCompleted(__instance, __result);
+        }
+
+        private static Exception Finalizer(
+            Building __instance,
+            bool __runOriginal,
+            Exception __exception)
+        {
+            try
+            {
+                HeaterRuntime.OnHeaterOperationException(
+                    __instance,
+                    __runOriginal,
+                    __exception);
+            }
+            catch
+            {
+            }
+
+            return __exception;
         }
     }
 
@@ -150,7 +188,7 @@ namespace HeaterEnhancement.Patches
     {
         private static void Postfix()
         {
-            HeaterRuntime.ReapplyAllSeasonStates();
+            HeaterRuntime.OnSeasonStateUpdated();
         }
     }
 

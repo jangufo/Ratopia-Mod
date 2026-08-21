@@ -143,24 +143,18 @@ namespace HeaterEnhancement.Tests
                     .index;
                 Assert.True(dirtyClear > worldObjectsRead);
 
-                foreach (var callerName in new[] { "TickSafely", "ReapplyAllSeasonStates" })
-                {
-                    var caller = runtime.Methods.Single(method => method.Name == callerName);
-                    Assert.Contains(caller.Body.Instructions, instruction =>
-                        instruction.Operand is MethodReference method &&
-                        method.DeclaringType.FullName ==
-                        "HeaterEnhancement.Runtime.HeaterRuntime" &&
-                        method.Name == "RemoveOrphanedHeatSystemBuffs");
-                    Assert.Contains(caller.Body.Instructions, instruction =>
-                        instruction.Operand is FieldReference field &&
-                        field.DeclaringType.FullName == "GameMgr" &&
-                        field.Name == "_EnvMgr");
-                }
-
-                var tick = runtime.Methods.Single(method => method.Name == "TickSafely");
-                AssertCallOccursAfter(tick, "RemoveMissingHeaters", "RemoveOrphanedHeatSystemBuffs");
-                var reapply = runtime.Methods.Single(method => method.Name == "ReapplyAllSeasonStates");
-                AssertCallOccursAfter(reapply, "ApplySeasonState", "RemoveOrphanedHeatSystemBuffs");
+                var batch = runtime.Methods.Single(
+                    method => method.Name == "ApplyPendingSeasonBatch");
+                Assert.Contains(batch.Body.Instructions, instruction =>
+                    instruction.Operand is MethodReference method &&
+                    method.DeclaringType.FullName ==
+                    "HeaterEnhancement.Runtime.HeaterRuntime" &&
+                    method.Name == "RemoveOrphanedHeatSystemBuffs");
+                Assert.Contains(batch.Body.Instructions, instruction =>
+                    instruction.Operand is FieldReference field &&
+                    field.DeclaringType.FullName == "GameMgr" &&
+                    field.Name == "_EnvMgr");
+                AssertCallOccursAfter(batch, "ApplySeasonState", "RemoveOrphanedHeatSystemBuffs");
 
                 var auditCallers = runtime.Methods.Where(method => method.HasBody &&
                     method.Body.Instructions.Any(instruction =>
@@ -169,8 +163,96 @@ namespace HeaterEnhancement.Tests
                         "HeaterEnhancement.Runtime.HeaterRuntime" &&
                         called.Name == "RemoveOrphanedHeatSystemBuffs"));
                 Assert.Equal(
-                    new[] { "ReapplyAllSeasonStates", "TickSafely" },
+                    new[] { "ApplyPendingSeasonBatch" },
                     auditCallers.Select(method => method.Name).OrderBy(name => name));
+            }
+        }
+
+        [Fact]
+        public void SeasonBatchLifecycleIsDeduplicatedExceptionIsolatedAndCommitsAfterAudit()
+        {
+            using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
+            {
+                var runtime = assembly.MainModule.GetType("HeaterEnhancement.Runtime.HeaterRuntime");
+                var initialize = runtime.Methods.Single(method => method.Name == "InitializeHeater");
+                var batch = runtime.Methods.SingleOrDefault(
+                    method => method.Name == "ApplyPendingSeasonBatch");
+                var seasonUpdated = runtime.Methods.SingleOrDefault(
+                    method => method.Name == "OnSeasonStateUpdated");
+                var reapply = runtime.Methods.Single(method => method.Name == "ReapplyAllSeasonStates");
+
+                Assert.NotNull(batch);
+                Assert.NotNull(seasonUpdated);
+                Assert.DoesNotContain(initialize.Body.Instructions, instruction =>
+                    instruction.Operand is MethodReference called &&
+                    called.Name == "ApplySeasonState");
+                AssertCallsMethod(
+                    initialize,
+                    "HeaterEnhancement.Core.HeaterSeasonBatchCoordinator",
+                    "QueueHeater");
+                Assert.True(batch.Body.ExceptionHandlers.Count >= 2);
+                AssertCallsMethod(
+                    batch,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "ApplySeasonState");
+                AssertContainsCallWithBooleanArgument(
+                    batch,
+                    "InvalidateEffectiveCoverage",
+                    true);
+                AssertCallOccursAfter(
+                    batch,
+                    "RemoveOrphanedHeatSystemBuffs",
+                    "TryCommit");
+                Assert.Contains(seasonUpdated.Body.ExceptionHandlers, handler =>
+                    handler.HandlerType == Mono.Cecil.Cil.ExceptionHandlerType.Catch);
+                Assert.Contains(reapply.Body.ExceptionHandlers, handler =>
+                    handler.HandlerType == Mono.Cecil.Cil.ExceptionHandlerType.Catch);
+
+                var seasonPatch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.WeatherSeasonStatePatch");
+                var electricityPatch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.ElectricityRefreshPatch");
+                AssertCallsRuntime(seasonPatch, "Postfix", "OnSeasonStateUpdated");
+                AssertCallsRuntime(electricityPatch, "Postfix", "ReapplyAllSeasonStates");
+            }
+        }
+
+        [Fact]
+        public void Update3AndWireCheckFinalizersInvalidateCoverageAndReturnOriginalExceptions()
+        {
+            using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
+            {
+                var runtime = assembly.MainModule.GetType("HeaterEnhancement.Runtime.HeaterRuntime");
+                var exceptionHook = runtime.Methods.SingleOrDefault(
+                    method => method.Name == "OnHeaterOperationException");
+                Assert.NotNull(exceptionHook);
+                AssertContainsCallWithBooleanArgument(
+                    exceptionHook,
+                    "InvalidateEffectiveCoverage",
+                    true);
+
+                foreach (var patchName in new[]
+                         {
+                             "HeaterEnhancement.Patches.HeaterBuildingUpdatePatch",
+                             "HeaterEnhancement.Patches.HeaterWireCheckPatch"
+                         })
+                {
+                    var patchType = assembly.MainModule.GetType(patchName);
+                    var finalizer = patchType.Methods.SingleOrDefault(
+                        method => method.Name == "Finalizer");
+                    Assert.NotNull(finalizer);
+                    Assert.Equal("System.Exception", finalizer.ReturnType.FullName);
+                    Assert.Contains(finalizer.Parameters, parameter =>
+                        parameter.Name == "__runOriginal" &&
+                        parameter.ParameterType.FullName == "System.Boolean");
+                    Assert.Contains(finalizer.Parameters, parameter =>
+                        parameter.Name == "__exception" &&
+                        parameter.ParameterType.FullName == "System.Exception");
+                    Assert.Contains(finalizer.Body.ExceptionHandlers, handler =>
+                        handler.HandlerType == Mono.Cecil.Cil.ExceptionHandlerType.Catch);
+                    AssertCallsRuntime(patchType, "Finalizer", "OnHeaterOperationException");
+                    AssertReturnsParameter(finalizer, "__exception");
+                }
             }
         }
 
@@ -235,7 +317,7 @@ namespace HeaterEnhancement.Tests
                          {
                              "OnHeaterWireCheckCompleted",
                              "OnHeaterWorkingStopped",
-                             "DisableForNonWinter",
+                             "DisableForNonWinterCore",
                              "OnBuildingDemolishing",
                              "RemoveMissingHeaters"
                          })
@@ -372,7 +454,7 @@ namespace HeaterEnhancement.Tests
                          {
                              "OnHeaterWireCheckCompleted",
                              "OnHeaterWorkingStopped",
-                             "DisableForNonWinter",
+                             "DisableForNonWinterCore",
                              "OnBuildingDemolishing",
                              "RemoveMissingHeaters"
                          })
@@ -594,14 +676,33 @@ namespace HeaterEnhancement.Tests
                 var shutdown = runtime.Methods.Single(method => method.Name == "Shutdown");
                 var restore = runtime.Methods.SingleOrDefault(
                     method => method.Name == "RestoreHeaterOnShutdown");
+                var removeExtendedBuffs = runtime.Methods.SingleOrDefault(
+                    method => method.Name == "RemoveExtendedHeatSystemOnShutdown");
 
                 Assert.NotNull(restore);
+                Assert.NotNull(removeExtendedBuffs);
                 Assert.Contains(shutdown.Body.ExceptionHandlers, handler =>
                     handler.HandlerType == Mono.Cecil.Cil.ExceptionHandlerType.Catch);
                 Assert.Contains(shutdown.Body.Instructions, instruction =>
                     instruction.Operand is MethodReference method &&
                     method.DeclaringType.FullName == "HeaterEnhancement.Runtime.HeaterRuntime" &&
+                    method.Name == "RemoveExtendedHeatSystemOnShutdown");
+                Assert.Contains(shutdown.Body.Instructions, instruction =>
+                    instruction.Operand is MethodReference method &&
+                    method.DeclaringType.FullName == "HeaterEnhancement.Runtime.HeaterRuntime" &&
                     method.Name == "RestoreHeaterOnShutdown");
+                AssertCallOccursAfter(
+                    shutdown,
+                    "RemoveExtendedHeatSystemOnShutdown",
+                    "RestoreHeaterOnShutdown");
+                AssertCallsMethod(
+                    removeExtendedBuffs,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "GetLocalPositions");
+                AssertCallsMethod(
+                    removeExtendedBuffs,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "RemoveHeatSystemAt");
                 Assert.True(restore.Body.ExceptionHandlers.Count >= 2);
                 Assert.Contains(restore.Body.Instructions, instruction =>
                     instruction.Operand is MethodReference method &&
@@ -657,6 +758,32 @@ namespace HeaterEnhancement.Tests
                 instruction.Operand is MethodReference called &&
                 called.DeclaringType.FullName == declaringType &&
                 called.Name == methodName);
+        }
+
+        private static void AssertReturnsParameter(
+            MethodDefinition method,
+            string parameterName)
+        {
+            var parameter = method.Parameters.Single(item => item.Name == parameterName);
+            var returnInstruction = method.Body.Instructions.Last(instruction =>
+                instruction.OpCode.Code == Mono.Cecil.Cil.Code.Ret);
+            var previous = returnInstruction.Previous;
+            while (previous != null && previous.OpCode.Code == Mono.Cecil.Cil.Code.Nop)
+            {
+                previous = previous.Previous;
+            }
+
+            Assert.NotNull(previous);
+            var expectedShortLoad = parameter.Index == 0
+                ? Mono.Cecil.Cil.Code.Ldarg_0
+                : parameter.Index == 1
+                    ? Mono.Cecil.Cil.Code.Ldarg_1
+                    : parameter.Index == 2
+                        ? Mono.Cecil.Cil.Code.Ldarg_2
+                        : Mono.Cecil.Cil.Code.Ldarg_3;
+            Assert.True(
+                ReferenceEquals(parameter, previous.Operand) ||
+                previous.OpCode.Code == expectedShortLoad);
         }
 
         private static void AssertCallOccursAfter(

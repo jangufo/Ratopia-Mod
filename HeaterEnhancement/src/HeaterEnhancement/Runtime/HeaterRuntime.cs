@@ -29,6 +29,8 @@ namespace HeaterEnhancement.Runtime
         private static readonly HeaterCoverageRegistry EffectiveCoverage =
             new HeaterCoverageRegistry();
         private static readonly HeaterDisableTracker DisableTracker = new HeaterDisableTracker();
+        private static readonly HeaterSeasonBatchCoordinator SeasonBatch =
+            new HeaterSeasonBatchCoordinator();
         private static readonly Dictionary<int, HeaterState> HeaterStates =
             new Dictionary<int, HeaterState>();
         private static readonly List<GreenBox> ConstructionPreviewBoxes = new List<GreenBox>();
@@ -63,6 +65,7 @@ namespace HeaterEnhancement.Runtime
             try
             {
                 InitializeHeater(heater);
+                ApplyPendingSeasonBatch();
             }
             catch (Exception exception)
             {
@@ -80,7 +83,7 @@ namespace HeaterEnhancement.Runtime
             try
             {
                 EnsureHeaterTracked(heater);
-                ApplySeasonState(heater);
+                ApplyPendingSeasonBatch();
             }
             catch (Exception exception)
             {
@@ -147,6 +150,28 @@ namespace HeaterEnhancement.Runtime
             }
 
             InvalidateEffectiveCoverage(heater.m_ID, false);
+        }
+
+        public static void OnHeaterOperationException(
+            Building building,
+            bool originalRan,
+            Exception exception)
+        {
+            var heater = building as Building_Heater;
+            if (!_enabled || _shuttingDown || !originalRan || exception == null || heater == null)
+            {
+                return;
+            }
+
+            try
+            {
+                InvalidateEffectiveCoverage(heater.m_ID, true);
+            }
+            catch (Exception coordinationException)
+            {
+                _orphanAuditDirty = true;
+                LogError("加热器原版操作异常后的范围失效", coordinationException);
+            }
         }
 
         public static void OnHeaterWorkingStopped(Building_Heater heater)
@@ -433,15 +458,14 @@ namespace HeaterEnhancement.Runtime
                 RemoveMissingHeaters(activeHeaterIds);
 
                 var seasonValue = (int)weatherManager.m_SeasonState;
-                if (_lastSeasonValue != seasonValue)
+                var seasonChanged = _lastSeasonValue != seasonValue;
+                SeasonBatch.EnsureSeasonBatch(seasonValue, activeHeaterIds);
+                ApplyPendingSeasonBatch();
+                if (seasonChanged && _lastSeasonValue == seasonValue)
                 {
-                    _lastSeasonValue = seasonValue;
                     _logger?.LogInfo(
                         $"加热器会话已同步：发现 {heatersFound} 个加热器，当前季节 {weatherManager.m_SeasonState}。");
-                    ReapplyAllSeasonStates();
                 }
-
-                RemoveOrphanedHeatSystemBuffs(weatherManager.m_SeasonState, game._EnvMgr);
             }
             catch (Exception exception)
             {
@@ -458,32 +482,7 @@ namespace HeaterEnhancement.Runtime
 
             try
             {
-                InvalidateEffectiveCoverage(heater.m_ID, false);
-                var firstDisable = DisableTracker.BeginNonWinterDisable(heater.m_ID);
-                if (firstDisable)
-                {
-                    ClearCurrentRange(heater);
-                }
-
-                heater.m_ElecNum = 0;
-
-                if (firstDisable && heater.m_Body != null && heater.m_Body.m_Animator != null)
-                {
-                    heater.m_Body.m_Animator.Play("End");
-                }
-
-                if (heater.m_ElecWire != null && heater.m_ElecWire.Obj != null)
-                {
-                    heater.m_ElecWire.Obj.SetActive(false);
-                }
-
-                var game = GameMgr.Instance;
-                if (game != null && game._BuildingMgr != null && heater.m_Info != null)
-                {
-                    game._BuildingMgr.ConnectUseBuild(heater.m_ID, -1, heater.m_Info.ElecCost);
-                }
-
-                SuppressNonWinterPowerAlarm(heater);
+                DisableForNonWinterCore(heater);
             }
             catch (Exception exception)
             {
@@ -491,7 +490,61 @@ namespace HeaterEnhancement.Runtime
             }
         }
 
+        private static void DisableForNonWinterCore(Building_Heater heater)
+        {
+            InvalidateEffectiveCoverage(heater.m_ID, false);
+            var firstDisable = DisableTracker.BeginNonWinterDisable(heater.m_ID);
+            if (firstDisable)
+            {
+                ClearCurrentRange(heater);
+            }
+
+            heater.m_ElecNum = 0;
+
+            if (firstDisable && heater.m_Body != null && heater.m_Body.m_Animator != null)
+            {
+                heater.m_Body.m_Animator.Play("End");
+            }
+
+            if (heater.m_ElecWire != null && heater.m_ElecWire.Obj != null)
+            {
+                heater.m_ElecWire.Obj.SetActive(false);
+            }
+
+            var game = GameMgr.Instance;
+            if (game != null && game._BuildingMgr != null && heater.m_Info != null)
+            {
+                game._BuildingMgr.ConnectUseBuild(heater.m_ID, -1, heater.m_Info.ElecCost);
+            }
+
+            SuppressNonWinterPowerAlarm(heater);
+        }
+
         public static void ReapplyAllSeasonStates()
+        {
+            try
+            {
+                QueueTrackedHeatersForSeason(true);
+            }
+            catch (Exception exception)
+            {
+                LogError("重新应用加热器季节状态", exception);
+            }
+        }
+
+        public static void OnSeasonStateUpdated()
+        {
+            try
+            {
+                QueueTrackedHeatersForSeason(false);
+            }
+            catch (Exception exception)
+            {
+                LogError("季节变化后同步加热器", exception);
+            }
+        }
+
+        private static void QueueTrackedHeatersForSeason(bool forceNewBatch)
         {
             if (!_enabled || _shuttingDown)
             {
@@ -499,7 +552,7 @@ namespace HeaterEnhancement.Runtime
             }
 
             var staleHeaterIds = new List<int>();
-            var heaters = new List<Building_Heater>();
+            var heaterIds = new List<int>();
             foreach (var pair in HeaterStates)
             {
                 if (pair.Value.Heater == null)
@@ -508,7 +561,7 @@ namespace HeaterEnhancement.Runtime
                 }
                 else
                 {
-                    heaters.Add(pair.Value.Heater);
+                    heaterIds.Add(pair.Key);
                 }
             }
 
@@ -518,18 +571,25 @@ namespace HeaterEnhancement.Runtime
                 RemoveHeatSystemAt(Coverage.Unregister(heaterId));
                 DisableTracker.Remove(heaterId);
                 HeaterStates.Remove(heaterId);
+                SeasonBatch.RemoveHeater(heaterId);
             }
 
-            foreach (var heater in heaters)
+            SeasonState season;
+            if (!TryGetSeasonState(out season))
             {
-                ApplySeasonState(heater);
+                return;
             }
 
-            var game = GameMgr.Instance;
-            if (game != null && game._WeatherMgr != null)
+            if (forceNewBatch)
             {
-                RemoveOrphanedHeatSystemBuffs(game._WeatherMgr.m_SeasonState, game._EnvMgr);
+                SeasonBatch.BeginBatch((int)season, heaterIds);
             }
+            else
+            {
+                SeasonBatch.EnsureSeasonBatch((int)season, heaterIds);
+            }
+
+            ApplyPendingSeasonBatch();
         }
 
         public static void OnBuildingDemolishing(Building building)
@@ -556,6 +616,7 @@ namespace HeaterEnhancement.Runtime
 
                 DisableTracker.Remove(heater.m_ID);
                 HeaterStates.Remove(heater.m_ID);
+                SeasonBatch.RemoveHeater(heater.m_ID);
             }
             catch (Exception exception)
             {
@@ -607,6 +668,11 @@ namespace HeaterEnhancement.Runtime
 
                 foreach (var state in HeaterStates.Values)
                 {
+                    RemoveExtendedHeatSystemOnShutdown(state);
+                }
+
+                foreach (var state in HeaterStates.Values)
+                {
                     RestoreHeaterOnShutdown(state);
                 }
             }
@@ -615,6 +681,7 @@ namespace HeaterEnhancement.Runtime
                 Coverage.Clear();
                 EffectiveCoverage.Clear();
                 DisableTracker.Clear();
+                SeasonBatch.Reset();
                 HeaterStates.Clear();
                 _buildingManager = null;
                 _enabled = false;
@@ -623,6 +690,23 @@ namespace HeaterEnhancement.Runtime
                 _lastSeasonValue = int.MinValue;
                 _orphanAuditDirty = false;
                 _logger = null;
+            }
+        }
+
+        private static void RemoveExtendedHeatSystemOnShutdown(HeaterState state)
+        {
+            if (state.Heater == null)
+            {
+                return;
+            }
+
+            try
+            {
+                RemoveHeatSystemAt(ToGridPoints(GetLocalPositions(state.Heater)));
+            }
+            catch (Exception exception)
+            {
+                LogError($"卸载时移除加热器 {state.Heater.m_ID} 的扩展范围 Buff", exception);
             }
         }
 
@@ -672,7 +756,11 @@ namespace HeaterEnhancement.Runtime
         private static void InitializeHeater(Building_Heater heater)
         {
             SynchronizeExtendedRange(heater);
-            ApplySeasonState(heater);
+            SeasonState season;
+            if (TryGetSeasonState(out season))
+            {
+                SeasonBatch.QueueHeater((int)season, heater.m_ID);
+            }
         }
 
         private static void SynchronizeExtendedRange(Building_Heater heater)
@@ -709,6 +797,7 @@ namespace HeaterEnhancement.Runtime
                 RemoveHeatSystemAt(Coverage.Unregister(heaterId));
                 DisableTracker.Remove(heaterId);
                 HeaterStates.Remove(heaterId);
+                SeasonBatch.RemoveHeater(heaterId);
             }
         }
 
@@ -718,6 +807,7 @@ namespace HeaterEnhancement.Runtime
             Coverage.Clear();
             EffectiveCoverage.Clear();
             DisableTracker.Clear();
+            SeasonBatch.Reset();
             HeaterStates.Clear();
             _buildingManager = null;
             _lastSeasonValue = int.MinValue;
@@ -813,7 +903,63 @@ namespace HeaterEnhancement.Runtime
             }
             else
             {
-                DisableForNonWinter(heater);
+                DisableForNonWinterCore(heater);
+            }
+        }
+
+        private static void ApplyPendingSeasonBatch()
+        {
+            if (!_enabled || _shuttingDown)
+            {
+                return;
+            }
+
+            var game = GameMgr.Instance;
+            var weatherManager = game != null ? game._WeatherMgr : null;
+            if (weatherManager == null)
+            {
+                return;
+            }
+
+            foreach (var heaterId in SeasonBatch.GetPendingHeaterIds())
+            {
+                HeaterState state;
+                if (!HeaterStates.TryGetValue(heaterId, out state) || state.Heater == null)
+                {
+                    InvalidateEffectiveCoverage(heaterId, false);
+                    RemoveHeatSystemAt(Coverage.Unregister(heaterId));
+                    DisableTracker.Remove(heaterId);
+                    HeaterStates.Remove(heaterId);
+                    SeasonBatch.RemoveHeater(heaterId);
+                    continue;
+                }
+
+                try
+                {
+                    ApplySeasonState(state.Heater);
+                    SeasonBatch.MarkSucceeded(heaterId);
+                }
+                catch (Exception exception)
+                {
+                    InvalidateEffectiveCoverage(heaterId, true);
+                    LogError($"应用加热器 {heaterId} 的季节状态", exception);
+                }
+            }
+
+            try
+            {
+                RemoveOrphanedHeatSystemBuffs(weatherManager.m_SeasonState, game._EnvMgr);
+            }
+            catch (Exception exception)
+            {
+                LogError("批次结束时清理失效的加热器 Buff", exception);
+                return;
+            }
+
+            int committedSeason;
+            if (SeasonBatch.TryCommit(out committedSeason))
+            {
+                _lastSeasonValue = committedSeason;
             }
         }
 
