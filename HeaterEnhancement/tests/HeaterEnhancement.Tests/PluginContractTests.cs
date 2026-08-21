@@ -213,7 +213,102 @@ namespace HeaterEnhancement.Tests
                 var electricityPatch = assembly.MainModule.GetType(
                     "HeaterEnhancement.Patches.ElectricityRefreshPatch");
                 AssertCallsRuntime(seasonPatch, "Postfix", "OnSeasonStateUpdated");
-                AssertCallsRuntime(electricityPatch, "Postfix", "ReapplyAllSeasonStates");
+                AssertCallsRuntime(
+                    electricityPatch,
+                    "Postfix",
+                    "OnElectricityRefreshCompleted");
+            }
+        }
+
+        [Fact]
+        public void ConstructionAndElectricityRefreshScopesSuppressOrConsumeOriginalUpdates()
+        {
+            using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
+            {
+                var runtime = assembly.MainModule.GetType("HeaterEnhancement.Runtime.HeaterRuntime");
+                var buildingSetPatch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.HeaterBuildingSetPatch");
+                var update3Patch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.HeaterBuildingUpdatePatch");
+                var refreshPatch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.ElectricityRefreshPatch");
+
+                AssertCallsRuntime(buildingSetPatch, "Prefix", "BeginBuildingSetUpdateScope");
+                AssertCallsRuntime(buildingSetPatch, "Postfix", "OnHeaterInitialized");
+                AssertScopeFinalizer(buildingSetPatch);
+
+                AssertCallsRuntime(update3Patch, "Prefix", "SuppressBuildingSetUpdate");
+                AssertCallsRuntime(update3Patch, "Finalizer", "OnHeaterOperationException");
+
+                var initialized = runtime.Methods.Single(method =>
+                    method.Name == "OnHeaterInitialized");
+                AssertCallsMethod(
+                    initialized,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "BeginBuildingSetModUpdate");
+                AssertCallsMethod(
+                    initialized,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "EndUpdateScope");
+                Assert.Contains(initialized.Body.ExceptionHandlers, handler =>
+                    handler.HandlerType == Mono.Cecil.Cil.ExceptionHandlerType.Finally);
+
+                AssertCallsRuntime(refreshPatch, "Prefix", "BeginElectricityRefreshScope");
+                AssertCallsRuntime(refreshPatch, "Postfix", "OnElectricityRefreshCompleted");
+                AssertScopeFinalizer(refreshPatch);
+
+                var refreshCompleted = runtime.Methods.SingleOrDefault(method =>
+                    method.Name == "OnElectricityRefreshCompleted");
+                Assert.NotNull(refreshCompleted);
+                AssertCallsMethod(
+                    refreshCompleted,
+                    "HeaterEnhancement.Core.HeaterUpdateScopeCoordinator",
+                    "GetSuccessfulOriginalUpdates");
+                AssertCallsMethod(
+                    refreshCompleted,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "QueueTrackedHeatersForSeason");
+
+                var reset = runtime.Methods.Single(method => method.Name == "ResetSession");
+                AssertCallsMethod(
+                    reset,
+                    "HeaterEnhancement.Core.HeaterUpdateScopeCoordinator",
+                    "Reset");
+            }
+        }
+
+        [Fact]
+        public void ElectricityRefreshConsumesOnlyCompletedPoweredWorkingUpdates()
+        {
+            using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
+            {
+                var runtime = assembly.MainModule.GetType("HeaterEnhancement.Runtime.HeaterRuntime");
+                var update3Finalized = runtime.Methods.SingleOrDefault(method =>
+                    method.Name == "OnHeaterUpdate3Finalized");
+                var workingCompleted = runtime.Methods.Single(method =>
+                    method.Name == "OnHeaterWorkingUpdateCompleted");
+
+                if (update3Finalized != null)
+                {
+                    Assert.DoesNotContain(update3Finalized.Body.Instructions, instruction =>
+                        instruction.Operand is MethodReference called &&
+                        called.DeclaringType.FullName ==
+                        "HeaterEnhancement.Core.HeaterUpdateScopeCoordinator" &&
+                        called.Name == "RecordSuccessfulOriginalUpdate");
+                }
+
+                AssertCallsMethod(
+                    workingCompleted,
+                    "HeaterEnhancement.Core.HeaterUpdateScopeCoordinator",
+                    "RecordSuccessfulOriginalUpdate");
+
+                var workingPatch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.HeaterWorkingUpdatePatch");
+                var finalizer = workingPatch.Methods.Single(method =>
+                    method.Name == "Finalizer");
+                Assert.Contains(finalizer.Body.ExceptionHandlers, handler =>
+                    handler.HandlerType == Mono.Cecil.Cil.ExceptionHandlerType.Catch);
+                AssertReturnsParameter(finalizer, "__exception");
             }
         }
 
@@ -231,13 +326,15 @@ namespace HeaterEnhancement.Tests
                     "InvalidateEffectiveCoverage",
                     true);
 
-                foreach (var patchName in new[]
-                         {
-                             "HeaterEnhancement.Patches.HeaterBuildingUpdatePatch",
-                             "HeaterEnhancement.Patches.HeaterWireCheckPatch"
-                         })
+                var update3Patch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.HeaterBuildingUpdatePatch");
+                var wireCheckPatch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.HeaterWireCheckPatch");
+                AssertCallsRuntime(update3Patch, "Finalizer", "OnHeaterOperationException");
+                AssertCallsRuntime(wireCheckPatch, "Finalizer", "OnHeaterOperationException");
+
+                foreach (var patchType in new[] { update3Patch, wireCheckPatch })
                 {
-                    var patchType = assembly.MainModule.GetType(patchName);
                     var finalizer = patchType.Methods.SingleOrDefault(
                         method => method.Name == "Finalizer");
                     Assert.NotNull(finalizer);
@@ -250,7 +347,6 @@ namespace HeaterEnhancement.Tests
                         parameter.ParameterType.FullName == "System.Exception");
                     Assert.Contains(finalizer.Body.ExceptionHandlers, handler =>
                         handler.HandlerType == Mono.Cecil.Cil.ExceptionHandlerType.Catch);
-                    AssertCallsRuntime(patchType, "Finalizer", "OnHeaterOperationException");
                     AssertReturnsParameter(finalizer, "__exception");
                 }
             }
@@ -735,7 +831,24 @@ namespace HeaterEnhancement.Tests
             Assert.Contains(patchMethod.Body.Instructions, instruction =>
                 instruction.Operand is MethodReference called &&
                 called.DeclaringType.FullName == "HeaterEnhancement.Runtime.HeaterRuntime" &&
-                called.Name == runtimeMethodName);
+                    called.Name == runtimeMethodName);
+        }
+
+        private static void AssertScopeFinalizer(TypeDefinition patchType)
+        {
+            var finalizer = patchType.Methods.SingleOrDefault(method => method.Name == "Finalizer");
+            Assert.NotNull(finalizer);
+            Assert.Equal("System.Exception", finalizer.ReturnType.FullName);
+            Assert.Contains(finalizer.Parameters, parameter =>
+                parameter.Name == "__state" &&
+                parameter.ParameterType.FullName == "System.Object");
+            Assert.Contains(finalizer.Parameters, parameter =>
+                parameter.Name == "__exception" &&
+                parameter.ParameterType.FullName == "System.Exception");
+            Assert.Contains(finalizer.Body.ExceptionHandlers, handler =>
+                handler.HandlerType == Mono.Cecil.Cil.ExceptionHandlerType.Catch);
+            AssertCallsRuntime(patchType, "Finalizer", "EndUpdateScope");
+            AssertReturnsParameter(finalizer, "__exception");
         }
 
         private static void AssertReadsField(

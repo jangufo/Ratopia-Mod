@@ -31,6 +31,8 @@ namespace HeaterEnhancement.Runtime
         private static readonly HeaterDisableTracker DisableTracker = new HeaterDisableTracker();
         private static readonly HeaterSeasonBatchCoordinator SeasonBatch =
             new HeaterSeasonBatchCoordinator();
+        private static readonly HeaterUpdateScopeCoordinator UpdateScopes =
+            new HeaterUpdateScopeCoordinator();
         private static readonly Dictionary<int, HeaterState> HeaterStates =
             new Dictionary<int, HeaterState>();
         private static readonly List<GreenBox> ConstructionPreviewBoxes = new List<GreenBox>();
@@ -62,6 +64,7 @@ namespace HeaterEnhancement.Runtime
                 return;
             }
 
+            var updateScope = BeginBuildingSetModUpdate(heater);
             try
             {
                 InitializeHeater(heater);
@@ -70,6 +73,89 @@ namespace HeaterEnhancement.Runtime
             catch (Exception exception)
             {
                 LogError("初始化加热器范围", exception);
+            }
+            finally
+            {
+                EndUpdateScope(updateScope);
+            }
+        }
+
+        public static object BeginBuildingSetUpdateScope(Building_Heater heater)
+        {
+            if (!_enabled || _shuttingDown || heater == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return UpdateScopes.BeginBuildingSet(heater.m_ID);
+            }
+            catch (Exception exception)
+            {
+                LogError("建立加热器建造更新作用域", exception);
+                return null;
+            }
+        }
+
+        private static object BeginBuildingSetModUpdate(Building_Heater heater)
+        {
+            try
+            {
+                return UpdateScopes.BeginBuildingSetModUpdate(heater.m_ID);
+            }
+            catch (Exception exception)
+            {
+                LogError("允许建造后的扩展范围更新", exception);
+                return null;
+            }
+        }
+
+        public static bool SuppressBuildingSetUpdate(Building_Heater heater)
+        {
+            if (!_enabled || _shuttingDown || heater == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                return UpdateScopes.ShouldSuppressBuildingSetUpdate(heater.m_ID);
+            }
+            catch (Exception exception)
+            {
+                LogError("判断建造阶段原版加热器更新", exception);
+                return false;
+            }
+        }
+
+        public static object BeginElectricityRefreshScope()
+        {
+            if (!_enabled || _shuttingDown)
+            {
+                return null;
+            }
+
+            try
+            {
+                return UpdateScopes.BeginElectricityRefresh();
+            }
+            catch (Exception exception)
+            {
+                LogError("建立电网刷新作用域", exception);
+                return null;
+            }
+        }
+
+        public static void EndUpdateScope(object scope)
+        {
+            try
+            {
+                UpdateScopes.EndScope(scope);
+            }
+            catch (Exception exception)
+            {
+                LogError("清理加热器更新作用域", exception);
             }
         }
 
@@ -110,6 +196,7 @@ namespace HeaterEnhancement.Runtime
             {
                 if (succeeded)
                 {
+                    UpdateScopes.RecordSuccessfulOriginalUpdate(heater.m_ID);
                     SynchronizeEffectiveCoverage(heater);
                 }
                 else
@@ -532,6 +619,20 @@ namespace HeaterEnhancement.Runtime
             }
         }
 
+        public static void OnElectricityRefreshCompleted(object refreshScope)
+        {
+            try
+            {
+                var successfulOriginalUpdates = new HashSet<int>(
+                    UpdateScopes.GetSuccessfulOriginalUpdates(refreshScope));
+                QueueTrackedHeatersForSeason(true, successfulOriginalUpdates);
+            }
+            catch (Exception exception)
+            {
+                LogError("电网刷新后重新应用加热器状态", exception);
+            }
+        }
+
         public static void OnSeasonStateUpdated()
         {
             try
@@ -544,7 +645,9 @@ namespace HeaterEnhancement.Runtime
             }
         }
 
-        private static void QueueTrackedHeatersForSeason(bool forceNewBatch)
+        private static void QueueTrackedHeatersForSeason(
+            bool forceNewBatch,
+            ISet<int> excludedHeaterIds = null)
         {
             if (!_enabled || _shuttingDown)
             {
@@ -561,7 +664,10 @@ namespace HeaterEnhancement.Runtime
                 }
                 else
                 {
-                    heaterIds.Add(pair.Key);
+                    if (excludedHeaterIds == null || !excludedHeaterIds.Contains(pair.Key))
+                    {
+                        heaterIds.Add(pair.Key);
+                    }
                 }
             }
 
@@ -682,6 +788,7 @@ namespace HeaterEnhancement.Runtime
                 EffectiveCoverage.Clear();
                 DisableTracker.Clear();
                 SeasonBatch.Reset();
+                UpdateScopes.Reset();
                 HeaterStates.Clear();
                 _buildingManager = null;
                 _enabled = false;
@@ -808,6 +915,7 @@ namespace HeaterEnhancement.Runtime
             EffectiveCoverage.Clear();
             DisableTracker.Clear();
             SeasonBatch.Reset();
+            UpdateScopes.Reset();
             HeaterStates.Clear();
             _buildingManager = null;
             _lastSeasonValue = int.MinValue;

@@ -38,9 +38,10 @@ namespace HeaterEnhancement.Tests
                 Assert.Equal("Building_ElecBase", heater.BaseType.FullName);
                 AssertPrivateField(heater, "List_LocalPos", "System.Collections.Generic.List`1<UnityEngine.Vector2Int>");
                 AssertPrivateField(heater, "List_BlockPos", "System.Collections.Generic.List`1<UnityEngine.Vector2Int>");
-                AssertMethod(heater, "BuildingSet", "System.Void");
+                var buildingSet = AssertMethod(heater, "BuildingSet", "System.Void");
                 var directUpdate = AssertMethod(heater, "Building_Update", "System.Void");
                 AssertMethod(heater, "Building_Update3", "System.Void");
+                AssertCallsMethod(buildingSet, "Building", "Building_Update3");
                 AssertMethod(heater, "BuildingWorkingStop", "System.Void", "System.Boolean");
                 AssertMethod(heater, "LoadSetting3", "System.Void", "BuildingData");
                 AssertCallsMethod(directUpdate, "Building_Heater", "ApplyBuff");
@@ -74,7 +75,12 @@ namespace HeaterEnhancement.Tests
                     "System.Int32",
                     "System.Int32",
                     "System.Int32");
-                AssertMethod(buildingManager, "RefreshElecUseBuilding", "System.Void");
+                var refreshElectricity = AssertMethod(
+                    buildingManager,
+                    "RefreshElecUseBuilding",
+                    "System.Void");
+                AssertCallsMethod(refreshElectricity, "Building", "WireCheck");
+                AssertCallsMethod(refreshElectricity, "Building", "ActivateCheck");
 
                 var building = FindType(module, "Building");
                 AssertPublicField(building, "m_ID", "System.Int32");
@@ -90,6 +96,13 @@ namespace HeaterEnhancement.Tests
                 AssertCallsMethod(wireCheck, "BuildingMgr", "ConnectUseBuild");
                 AssertCallsMethod(wireCheck, "Building", "UseWatt");
                 AssertCallsMethod(wireCheck, "Building", "AlarmSet");
+                var baseActivateCheck = AssertMethod(
+                    building,
+                    "ActivateCheck",
+                    "System.Void",
+                    "System.Boolean",
+                    "System.Boolean");
+                AssertCallsMethod(baseActivateCheck, "Building", "BuildWorkResume");
 
                 var electricBuilding = FindType(module, "Building_ElecBase");
                 var activateCheck = AssertMethod(
@@ -102,6 +115,11 @@ namespace HeaterEnhancement.Tests
                 AssertCallsMethod(activateCheck, "Building", "AlarmSet");
                 AssertLoadsInt32(activateCheck, 6);
                 AssertLoadsInt32(activateCheck, 8);
+                var buildWorkResume = AssertMethod(
+                    electricBuilding,
+                    "BuildWorkResume",
+                    "System.Void");
+                AssertCallsMethod(buildWorkResume, "Building", "Building_Update3");
 
                 var miningBox = FindType(module, "MiningBox");
                 var constructionPreview = AssertMethod(

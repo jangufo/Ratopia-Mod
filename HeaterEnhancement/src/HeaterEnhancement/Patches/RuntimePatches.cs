@@ -7,9 +7,27 @@ namespace HeaterEnhancement.Patches
     [HarmonyPatch(typeof(Building_Heater), nameof(Building_Heater.BuildingSet))]
     internal static class HeaterBuildingSetPatch
     {
+        private static void Prefix(Building_Heater __instance, out object __state)
+        {
+            __state = HeaterRuntime.BeginBuildingSetUpdateScope(__instance);
+        }
+
         private static void Postfix(Building_Heater __instance)
         {
             HeaterRuntime.OnHeaterInitialized(__instance);
+        }
+
+        private static Exception Finalizer(object __state, Exception __exception)
+        {
+            try
+            {
+                HeaterRuntime.EndUpdateScope(__state);
+            }
+            catch
+            {
+            }
+
+            return __exception;
         }
     }
 
@@ -18,6 +36,11 @@ namespace HeaterEnhancement.Patches
     {
         private static bool Prefix(Building_Heater __instance)
         {
+            if (HeaterRuntime.SuppressBuildingSetUpdate(__instance))
+            {
+                return false;
+            }
+
             if (HeaterRuntime.AllowOriginalHeaterUpdate(__instance))
             {
                 return true;
@@ -66,10 +89,17 @@ namespace HeaterEnhancement.Patches
             bool __runOriginal,
             Exception __exception)
         {
-            HeaterRuntime.OnHeaterWorkingUpdateCompleted(
-                __instance,
-                __runOriginal,
-                __exception == null);
+            try
+            {
+                HeaterRuntime.OnHeaterWorkingUpdateCompleted(
+                    __instance,
+                    __runOriginal,
+                    __exception == null);
+            }
+            catch
+            {
+            }
+
             return __exception;
         }
     }
@@ -195,9 +225,27 @@ namespace HeaterEnhancement.Patches
     [HarmonyPatch(typeof(BuildingMgr), nameof(BuildingMgr.RefreshElecUseBuilding))]
     internal static class ElectricityRefreshPatch
     {
-        private static void Postfix()
+        private static void Prefix(out object __state)
         {
-            HeaterRuntime.ReapplyAllSeasonStates();
+            __state = HeaterRuntime.BeginElectricityRefreshScope();
+        }
+
+        private static void Postfix(object __state)
+        {
+            HeaterRuntime.OnElectricityRefreshCompleted(__state);
+        }
+
+        private static Exception Finalizer(object __state, Exception __exception)
+        {
+            try
+            {
+                HeaterRuntime.EndUpdateScope(__state);
+            }
+            catch
+            {
+            }
+
+            return __exception;
         }
     }
 
