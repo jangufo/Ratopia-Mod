@@ -88,9 +88,17 @@ namespace HeaterEnhancement.Runtime
             }
         }
 
-        public static void OnHeaterWorkingUpdateCompleted(Building_Heater heater, bool succeeded)
+        public static void OnHeaterWorkingUpdateCompleted(
+            Building_Heater heater,
+            bool originalRan,
+            bool succeeded)
         {
             if (!_enabled || _shuttingDown || heater == null)
+            {
+                return;
+            }
+
+            if (!originalRan)
             {
                 return;
             }
@@ -103,14 +111,31 @@ namespace HeaterEnhancement.Runtime
                 }
                 else
                 {
-                    InvalidateEffectiveCoverage(heater.m_ID);
+                    InvalidateEffectiveCoverage(heater.m_ID, true);
                 }
             }
             catch (Exception exception)
             {
-                InvalidateEffectiveCoverage(heater.m_ID);
+                InvalidateEffectiveCoverage(heater.m_ID, true);
                 LogError("同步加热器实际有效范围", exception);
             }
+        }
+
+        public static void OnHeaterWorkingUpdateSkipped(Building_Heater heater)
+        {
+            if (!_enabled || _shuttingDown || heater == null)
+            {
+                return;
+            }
+
+            SeasonState season;
+            if (TryGetSeasonState(out season) && season != SeasonState.Winter)
+            {
+                DisableForNonWinter(heater);
+                return;
+            }
+
+            InvalidateEffectiveCoverage(heater.m_ID, false);
         }
 
         public static void OnHeaterWireCheckCompleted(Building building, bool result)
@@ -121,7 +146,7 @@ namespace HeaterEnhancement.Runtime
                 return;
             }
 
-            InvalidateEffectiveCoverage(heater.m_ID);
+            InvalidateEffectiveCoverage(heater.m_ID, false);
         }
 
         public static void OnHeaterWorkingStopped(Building_Heater heater)
@@ -131,7 +156,7 @@ namespace HeaterEnhancement.Runtime
                 return;
             }
 
-            InvalidateEffectiveCoverage(heater.m_ID);
+            InvalidateEffectiveCoverage(heater.m_ID, false);
         }
 
         public static bool AllowOriginalHeaterUpdate(Building_Heater heater)
@@ -143,6 +168,18 @@ namespace HeaterEnhancement.Runtime
 
             SeasonState season;
             return !TryGetSeasonState(out season) || season == SeasonState.Winter;
+        }
+
+        public static bool AllowOriginalHeaterWorkingUpdate(Building_Heater heater)
+        {
+            if (_shuttingDown || !_enabled || heater == null)
+            {
+                return true;
+            }
+
+            SeasonState season;
+            return TryGetSeasonState(out season) && season == SeasonState.Winter &&
+                   heater.m_Activation && heater.m_ElecNum == 1;
         }
 
         public static void EnforceNonWinterWireResult(Building building, ref bool result)
@@ -421,7 +458,7 @@ namespace HeaterEnhancement.Runtime
 
             try
             {
-                InvalidateEffectiveCoverage(heater.m_ID);
+                InvalidateEffectiveCoverage(heater.m_ID, false);
                 var firstDisable = DisableTracker.BeginNonWinterDisable(heater.m_ID);
                 if (firstDisable)
                 {
@@ -477,7 +514,7 @@ namespace HeaterEnhancement.Runtime
 
             foreach (var heaterId in staleHeaterIds)
             {
-                InvalidateEffectiveCoverage(heaterId);
+                InvalidateEffectiveCoverage(heaterId, false);
                 RemoveHeatSystemAt(Coverage.Unregister(heaterId));
                 DisableTracker.Remove(heaterId);
                 HeaterStates.Remove(heaterId);
@@ -505,7 +542,7 @@ namespace HeaterEnhancement.Runtime
 
             try
             {
-                InvalidateEffectiveCoverage(heater.m_ID);
+                InvalidateEffectiveCoverage(heater.m_ID, false);
                 var tracked = HeaterStates.ContainsKey(heater.m_ID);
                 var uncovered = Coverage.Unregister(heater.m_ID);
                 if (tracked)
@@ -668,7 +705,7 @@ namespace HeaterEnhancement.Runtime
 
             foreach (var heaterId in missingHeaterIds)
             {
-                InvalidateEffectiveCoverage(heaterId);
+                InvalidateEffectiveCoverage(heaterId, false);
                 RemoveHeatSystemAt(Coverage.Unregister(heaterId));
                 DisableTracker.Remove(heaterId);
                 HeaterStates.Remove(heaterId);
@@ -693,19 +730,28 @@ namespace HeaterEnhancement.Runtime
             SeasonState season;
             if (BlockedPositionField == null || !TryGetSeasonState(out season))
             {
-                InvalidateEffectiveCoverage(heater.m_ID);
+                InvalidateEffectiveCoverage(heater.m_ID, true);
+                return;
+            }
+
+            var isWinter = season == SeasonState.Winter;
+            var isActive = heater.m_Activation;
+            var hasElectricity = heater.m_ElecNum == 1;
+            if (!isWinter || !isActive || !hasElectricity)
+            {
+                InvalidateEffectiveCoverage(heater.m_ID, true);
                 return;
             }
 
             var effective = HeaterEffectiveCoverageCalculator.Create(
                 ToGridPoints(GetLocalPositions(heater)),
                 ToGridPoints(GetBlockedPositions(heater)),
-                season == SeasonState.Winter,
-                heater.m_Activation,
-                heater.m_ElecNum == 1);
+                isWinter,
+                isActive,
+                hasElectricity);
             if (effective.Count == 0)
             {
-                InvalidateEffectiveCoverage(heater.m_ID);
+                InvalidateEffectiveCoverage(heater.m_ID, false);
                 return;
             }
 
@@ -716,10 +762,10 @@ namespace HeaterEnhancement.Runtime
             }
         }
 
-        private static void InvalidateEffectiveCoverage(int heaterId)
+        private static void InvalidateEffectiveCoverage(int heaterId, bool forceAudit)
         {
             var uncovered = EffectiveCoverage.Unregister(heaterId);
-            if (uncovered.Count > 0)
+            if (forceAudit || uncovered.Count > 0)
             {
                 _orphanAuditDirty = true;
             }

@@ -289,6 +289,161 @@ namespace HeaterEnhancement.Tests
         }
 
         [Fact]
+        public void DirectWorkingUpdateRequiresWinterActivationAndPowerWhileUpdate3KeepsTheSeasonGate()
+        {
+            using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
+            {
+                var runtime = assembly.MainModule.GetType("HeaterEnhancement.Runtime.HeaterRuntime");
+                var directGate = runtime.Methods.SingleOrDefault(
+                    method => method.Name == "AllowOriginalHeaterWorkingUpdate");
+                Assert.NotNull(directGate);
+                AssertReadsField(directGate, "Building", "m_Activation");
+                AssertReadsField(directGate, "Building", "m_ElecNum");
+                Assert.Contains(directGate.Body.Instructions, instruction =>
+                    instruction.OpCode.Code == Mono.Cecil.Cil.Code.Ldc_I4_1);
+                AssertCallsMethod(
+                    directGate,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "TryGetSeasonState");
+
+                var directPatch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.HeaterWorkingUpdatePatch");
+                var update3Patch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.HeaterBuildingUpdatePatch");
+                AssertCallsRuntime(
+                    directPatch,
+                    "Prefix",
+                    "AllowOriginalHeaterWorkingUpdate");
+                AssertCallsRuntime(
+                    directPatch,
+                    "Prefix",
+                    "OnHeaterWorkingUpdateSkipped");
+                AssertCallsRuntime(update3Patch, "Prefix", "AllowOriginalHeaterUpdate");
+                var update3Prefix = update3Patch.Methods.Single(method => method.Name == "Prefix");
+                Assert.DoesNotContain(update3Prefix.Body.Instructions, instruction =>
+                    instruction.Operand is MethodReference called &&
+                    called.Name == "AllowOriginalHeaterWorkingUpdate");
+            }
+        }
+
+        [Fact]
+        public void OriginalWorkingUpdateFailureForcesAuditEvenWithoutRegisteredCoverage()
+        {
+            using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
+            {
+                var runtime = assembly.MainModule.GetType("HeaterEnhancement.Runtime.HeaterRuntime");
+                var invalidate = runtime.Methods.Single(method =>
+                    method.Name == "InvalidateEffectiveCoverage");
+                Assert.Equal(
+                    new[] { "System.Int32", "System.Boolean" },
+                    invalidate.Parameters.Select(parameter => parameter.ParameterType.FullName));
+                Assert.Equal("forceAudit", invalidate.Parameters[1].Name);
+                Assert.Contains(invalidate.Body.Instructions, instruction =>
+                    instruction.OpCode.Code == Mono.Cecil.Cil.Code.Ldarg_1);
+
+                var completed = runtime.Methods.Single(method =>
+                    method.Name == "OnHeaterWorkingUpdateCompleted");
+                Assert.Equal(
+                    new[] { "Building_Heater", "System.Boolean", "System.Boolean" },
+                    completed.Parameters.Select(parameter => parameter.ParameterType.FullName));
+                Assert.Equal("originalRan", completed.Parameters[1].Name);
+                Assert.Equal("succeeded", completed.Parameters[2].Name);
+                AssertAllCallsUseBooleanArgument(
+                    completed,
+                    "InvalidateEffectiveCoverage",
+                    true);
+
+                var synchronize = runtime.Methods.Single(method =>
+                    method.Name == "SynchronizeEffectiveCoverage");
+                AssertContainsCallWithBooleanArgument(
+                    synchronize,
+                    "InvalidateEffectiveCoverage",
+                    true);
+
+                var skipped = runtime.Methods.SingleOrDefault(method =>
+                    method.Name == "OnHeaterWorkingUpdateSkipped");
+                Assert.NotNull(skipped);
+                AssertAllCallsUseBooleanArgument(
+                    skipped,
+                    "InvalidateEffectiveCoverage",
+                    false);
+
+                foreach (var methodName in new[]
+                         {
+                             "OnHeaterWireCheckCompleted",
+                             "OnHeaterWorkingStopped",
+                             "DisableForNonWinter",
+                             "OnBuildingDemolishing",
+                             "RemoveMissingHeaters"
+                         })
+                {
+                    AssertAllCallsUseBooleanArgument(
+                        runtime.Methods.Single(method => method.Name == methodName),
+                        "InvalidateEffectiveCoverage",
+                        false);
+                }
+
+                var directPatch = assembly.MainModule.GetType(
+                    "HeaterEnhancement.Patches.HeaterWorkingUpdatePatch");
+                var finalizer = directPatch.Methods.Single(method => method.Name == "Finalizer");
+                AssertCallsRuntime(
+                    directPatch,
+                    "Finalizer",
+                    "OnHeaterWorkingUpdateCompleted");
+                Assert.Contains(finalizer.Parameters, parameter =>
+                    parameter.Name == "__runOriginal" &&
+                    parameter.ParameterType.FullName == "System.Boolean");
+                Assert.Contains(finalizer.Parameters, parameter =>
+                    parameter.Name == "__exception" &&
+                    parameter.ParameterType.FullName == "System.Exception");
+            }
+        }
+
+        [Fact]
+        public void FullyBlockedEligibleWorkingUpdateDoesNotForceRepeatedAudit()
+        {
+            using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
+            {
+                var runtime = assembly.MainModule.GetType("HeaterEnhancement.Runtime.HeaterRuntime");
+                var synchronize = runtime.Methods.Single(method =>
+                    method.Name == "SynchronizeEffectiveCoverage");
+
+                AssertContainsCallWithBooleanArgument(
+                    synchronize,
+                    "InvalidateEffectiveCoverage",
+                    true);
+                AssertContainsCallWithBooleanArgument(
+                    synchronize,
+                    "InvalidateEffectiveCoverage",
+                    false);
+            }
+        }
+
+        [Fact]
+        public void SkippedDirectUpdateDisablesOnlyConfirmedNonWinterHeaters()
+        {
+            using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
+            {
+                var runtime = assembly.MainModule.GetType("HeaterEnhancement.Runtime.HeaterRuntime");
+                var skipped = runtime.Methods.Single(method =>
+                    method.Name == "OnHeaterWorkingUpdateSkipped");
+
+                AssertCallsMethod(
+                    skipped,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "TryGetSeasonState");
+                AssertCallsMethod(
+                    skipped,
+                    "HeaterEnhancement.Runtime.HeaterRuntime",
+                    "DisableForNonWinter");
+                AssertContainsCallWithBooleanArgument(
+                    skipped,
+                    "InvalidateEffectiveCoverage",
+                    false);
+            }
+        }
+
+        [Fact]
         public void NonWinterBypassPatchesTargetBothDirectUpdateAndWireCheck()
         {
             using (var assembly = AssemblyDefinition.ReadAssembly(typeof(HeaterRangeCalculator).Assembly.Location))
@@ -521,6 +676,45 @@ namespace HeaterEnhancement.Tests
             var earlier = calls.Last(item => item.method.Name == earlierMethod).index;
             var later = calls.Single(item => item.method.Name == laterMethod).index;
             Assert.True(later > earlier);
+        }
+
+        private static void AssertAllCallsUseBooleanArgument(
+            MethodDefinition method,
+            string calledMethodName,
+            bool expected)
+        {
+            var calls = method.Body.Instructions.Select((instruction, index) =>
+                    new { instruction, index })
+                .Where(item =>
+                    item.instruction.Operand is MethodReference called &&
+                    called.Name == calledMethodName)
+                .ToArray();
+            Assert.NotEmpty(calls);
+            foreach (var call in calls)
+            {
+                var argument = method.Body.Instructions[call.index - 1].OpCode.Code;
+                Assert.Equal(
+                    expected
+                        ? Mono.Cecil.Cil.Code.Ldc_I4_1
+                        : Mono.Cecil.Cil.Code.Ldc_I4_0,
+                    argument);
+            }
+        }
+
+        private static void AssertContainsCallWithBooleanArgument(
+            MethodDefinition method,
+            string calledMethodName,
+            bool expected)
+        {
+            Assert.Contains(method.Body.Instructions.Select((instruction, index) =>
+                    new { instruction, index }), item =>
+                item.index > 0 &&
+                item.instruction.Operand is MethodReference called &&
+                called.Name == calledMethodName &&
+                method.Body.Instructions[item.index - 1].OpCode.Code ==
+                (expected
+                    ? Mono.Cecil.Cil.Code.Ldc_I4_1
+                    : Mono.Cecil.Cil.Code.Ldc_I4_0));
         }
     }
 }

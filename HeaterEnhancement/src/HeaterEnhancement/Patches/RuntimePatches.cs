@@ -33,12 +33,12 @@ namespace HeaterEnhancement.Patches
     {
         private static bool Prefix(Building_Heater __instance)
         {
-            if (HeaterRuntime.AllowOriginalHeaterUpdate(__instance))
+            if (HeaterRuntime.AllowOriginalHeaterWorkingUpdate(__instance))
             {
                 return true;
             }
 
-            HeaterRuntime.DisableForNonWinter(__instance);
+            HeaterRuntime.OnHeaterWorkingUpdateSkipped(__instance);
             return false;
         }
 
@@ -49,7 +49,8 @@ namespace HeaterEnhancement.Patches
         {
             HeaterRuntime.OnHeaterWorkingUpdateCompleted(
                 __instance,
-                __runOriginal && __exception == null);
+                __runOriginal,
+                __exception == null);
             return __exception;
         }
     }
