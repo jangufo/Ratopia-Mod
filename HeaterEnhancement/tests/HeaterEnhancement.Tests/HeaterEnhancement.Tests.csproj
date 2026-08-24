@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HeaterEnhancement\HeaterEnhancement.csproj" />
+    <Reference Include="0Harmony" HintPath="$(BepInExCoreDir)\0Harmony.dll" Private="false" />
     <Reference Include="Mono.Cecil" HintPath="$(BepInExCoreDir)\Mono.Cecil.dll" Private="true" />
   </ItemGroup>
 

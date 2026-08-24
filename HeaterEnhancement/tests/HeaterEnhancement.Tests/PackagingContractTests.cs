@@ -33,7 +33,7 @@ namespace HeaterEnhancement.Tests
 
             using (var assembly = AssemblyDefinition.ReadAssembly(Path.Combine(output, "HeaterEnhancement.dll")))
             {
-                Assert.Equal(new Version(0, 1, 3, 0), assembly.Name.Version);
+                Assert.Equal(new Version(0, 1, 4, 0), assembly.Name.Version);
             }
         }
 
@@ -43,7 +43,7 @@ namespace HeaterEnhancement.Tests
             var script = RequireScript("Package.ps1");
 
             Assert.Contains("InstallAfterBuild=false", script);
-            Assert.Contains("加热器加强优化-v0.1.3-BepInEx5.zip", script);
+            Assert.Contains("加热器加强优化-v0.1.4-BepInEx5.zip", script);
             Assert.Contains("BepInEx\\plugins\\HeaterEnhancement", script);
             Assert.Contains("HeaterEnhancement.dll", script);
             Assert.Contains("README.md", script);
@@ -76,7 +76,7 @@ namespace HeaterEnhancement.Tests
         {
             var script = RequireScript("Install.ps1");
 
-            Assert.Contains("$expectedVersion = '0.1.3'", script);
+            Assert.Contains("$expectedVersion = '0.1.4'", script);
 
             foreach (var required in new[]
                      {

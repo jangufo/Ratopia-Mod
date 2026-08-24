@@ -13,7 +13,7 @@ namespace HeaterEnhancement
     {
         public const string PluginGuid = "cn.ratopia.heaterenhancement";
         public const string PluginName = "加热器加强优化";
-        public const string PluginVersion = "0.1.3";
+        public const string PluginVersion = "0.1.4";
 
         private static readonly IReadOnlyList<Type> PatchTypes = new[]
         {

@@ -15,7 +15,7 @@ if ([string]::IsNullOrWhiteSpace($RatopiaDir)) {
 }
 
 $expectedGuid = 'cn.ratopia.heaterenhancement'
-$expectedVersion = '0.1.3'
+$expectedVersion = '0.1.4'
 $projectRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 $ratopiaRoot = [IO.Path]::GetFullPath($RatopiaDir)
 if ([string]::IsNullOrWhiteSpace($PluginPath)) {

@@ -19,7 +19,7 @@ namespace HeaterEnhancement.Tests
                     item => item.AttributeType.FullName == "BepInEx.BepInPlugin");
                 Assert.Equal("cn.ratopia.heaterenhancement", attribute.ConstructorArguments[0].Value);
                 Assert.Equal("加热器加强优化", attribute.ConstructorArguments[1].Value);
-                Assert.Equal("0.1.3", attribute.ConstructorArguments[2].Value);
+                Assert.Equal("0.1.4", attribute.ConstructorArguments[2].Value);
 
                 foreach (var patchType in new[]
                          {
@@ -340,7 +340,7 @@ namespace HeaterEnhancement.Tests
                     Assert.NotNull(finalizer);
                     Assert.Equal("System.Exception", finalizer.ReturnType.FullName);
                     Assert.Contains(finalizer.Parameters, parameter =>
-                        parameter.Name == "__runOriginal" &&
+                        parameter.Name == "__state" &&
                         parameter.ParameterType.FullName == "System.Boolean");
                     Assert.Contains(finalizer.Parameters, parameter =>
                         parameter.Name == "__exception" &&
@@ -456,7 +456,7 @@ namespace HeaterEnhancement.Tests
                 var workingUpdateFinalizer = workingUpdatePatch.Methods.Single(
                     method => method.Name == "Finalizer");
                 Assert.Contains(workingUpdateFinalizer.Parameters, parameter =>
-                    parameter.Name == "__runOriginal" &&
+                    parameter.Name == "__state" &&
                     parameter.ParameterType.FullName == "System.Boolean");
                 AssertCallsRuntime(workingStopPatch, "Prefix", "OnHeaterWorkingStopped");
                 AssertCallsRuntime(
@@ -569,7 +569,7 @@ namespace HeaterEnhancement.Tests
                     "Finalizer",
                     "OnHeaterWorkingUpdateCompleted");
                 Assert.Contains(finalizer.Parameters, parameter =>
-                    parameter.Name == "__runOriginal" &&
+                    parameter.Name == "__state" &&
                     parameter.ParameterType.FullName == "System.Boolean");
                 Assert.Contains(finalizer.Parameters, parameter =>
                     parameter.Name == "__exception" &&

@@ -546,6 +546,10 @@ namespace HeaterEnhancement.Runtime
 
                 var seasonValue = (int)weatherManager.m_SeasonState;
                 var seasonChanged = _lastSeasonValue != seasonValue;
+                if (seasonChanged)
+                {
+                    _orphanAuditDirty = true;
+                }
                 SeasonBatch.EnsureSeasonBatch(seasonValue, activeHeaterIds);
                 ApplyPendingSeasonBatch();
                 if (seasonChanged && _lastSeasonValue == seasonValue)
@@ -637,6 +641,7 @@ namespace HeaterEnhancement.Runtime
         {
             try
             {
+                _orphanAuditDirty = true;
                 QueueTrackedHeatersForSeason(false);
             }
             catch (Exception exception)
@@ -1174,29 +1179,50 @@ namespace HeaterEnhancement.Runtime
                 return;
             }
 
+            var isWinter = season == SeasonState.Winter;
             var removedCount = 0;
+            var stoppedCount = 0;
             foreach (var plant in environmentManager.List_WorldObj)
             {
-                if (plant == null || plant.List_BuffName == null ||
-                    !plant.List_BuffName.Contains(HeatSystemBuffName))
+                if (plant == null)
                 {
                     continue;
                 }
 
-                if (season == SeasonState.Winter &&
-                    EffectiveCoverage.CoversAny(ToGridPoints(plant.GetSizeRect())))
+                var hasHeatSystem = plant.List_BuffName != null &&
+                                    plant.List_BuffName.Contains(HeatSystemBuffName);
+                var isCovered = isWinter &&
+                                EffectiveCoverage.CoversAny(ToGridPoints(plant.GetSizeRect()));
+                var action = PlantThermalAuditPlanner.Decide(
+                    isWinter,
+                    isCovered,
+                    hasHeatSystem,
+                    plant.IsGrowingStop());
+
+                if (action == PlantThermalAuditAction.RemoveHeatSystem ||
+                    action == PlantThermalAuditAction.RemoveHeatSystemAndStopGrowing)
                 {
-                    continue;
+                    plant.RemoveBuff(HeatSystemBuffName);
+                    removedCount++;
                 }
 
-                plant.RemoveBuff(HeatSystemBuffName);
-                removedCount++;
+                if (action == PlantThermalAuditAction.StopGrowing ||
+                    action == PlantThermalAuditAction.RemoveHeatSystemAndStopGrowing)
+                {
+                    plant.StopGrowing();
+                    if (plant.IsGrowingStop())
+                    {
+                        stoppedCount++;
+                    }
+                }
             }
 
             _orphanAuditDirty = false;
-            if (removedCount > 0)
+            if (removedCount > 0 || stoppedCount > 0)
             {
-                _logger?.LogInfo($"已清理 {removedCount} 个不再由有效加热器覆盖的 HeatSystem Buff。");
+                _logger?.LogInfo(
+                    $"植物供暖审计完成：清理 {removedCount} 个范围外 HeatSystem Buff，" +
+                    $"强制暂停 {stoppedCount} 个冬季范围外植物。");
             }
         }
 

@@ -34,8 +34,9 @@ namespace HeaterEnhancement.Patches
     [HarmonyPatch(typeof(Building_Heater), nameof(Building_Heater.Building_Update3))]
     internal static class HeaterBuildingUpdatePatch
     {
-        private static bool Prefix(Building_Heater __instance)
+        private static bool Prefix(Building_Heater __instance, out bool __state)
         {
+            __state = false;
             if (HeaterRuntime.SuppressBuildingSetUpdate(__instance))
             {
                 return false;
@@ -43,6 +44,7 @@ namespace HeaterEnhancement.Patches
 
             if (HeaterRuntime.AllowOriginalHeaterUpdate(__instance))
             {
+                __state = true;
                 return true;
             }
 
@@ -52,14 +54,14 @@ namespace HeaterEnhancement.Patches
 
         private static Exception Finalizer(
             Building_Heater __instance,
-            bool __runOriginal,
+            bool __state,
             Exception __exception)
         {
             try
             {
                 HeaterRuntime.OnHeaterOperationException(
                     __instance,
-                    __runOriginal,
+                    __state,
                     __exception);
             }
             catch
@@ -73,10 +75,12 @@ namespace HeaterEnhancement.Patches
     [HarmonyPatch(typeof(Building_Heater), nameof(Building_Heater.Building_Update))]
     internal static class HeaterWorkingUpdatePatch
     {
-        private static bool Prefix(Building_Heater __instance)
+        private static bool Prefix(Building_Heater __instance, out bool __state)
         {
+            __state = false;
             if (HeaterRuntime.AllowOriginalHeaterWorkingUpdate(__instance))
             {
+                __state = true;
                 return true;
             }
 
@@ -86,14 +90,14 @@ namespace HeaterEnhancement.Patches
 
         private static Exception Finalizer(
             Building_Heater __instance,
-            bool __runOriginal,
+            bool __state,
             Exception __exception)
         {
             try
             {
                 HeaterRuntime.OnHeaterWorkingUpdateCompleted(
                     __instance,
-                    __runOriginal,
+                    __state,
                     __exception == null);
             }
             catch
@@ -120,9 +124,10 @@ namespace HeaterEnhancement.Patches
     [HarmonyAfter("cn.ratopia.specialratizens")]
     internal static class HeaterWireCheckPatch
     {
-        private static bool Prefix(Building __instance, ref bool __result)
+        private static bool Prefix(Building __instance, ref bool __result, out bool __state)
         {
-            return HeaterRuntime.SuppressNonWinterWireCheck(__instance, ref __result);
+            __state = HeaterRuntime.SuppressNonWinterWireCheck(__instance, ref __result);
+            return __state;
         }
 
         private static void Postfix(Building __instance, ref bool __result)
@@ -133,14 +138,14 @@ namespace HeaterEnhancement.Patches
 
         private static Exception Finalizer(
             Building __instance,
-            bool __runOriginal,
+            bool __state,
             Exception __exception)
         {
             try
             {
                 HeaterRuntime.OnHeaterOperationException(
                     __instance,
-                    __runOriginal,
+                    __state,
                     __exception);
             }
             catch
