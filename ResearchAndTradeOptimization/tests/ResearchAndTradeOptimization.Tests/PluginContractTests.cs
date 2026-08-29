@@ -762,13 +762,13 @@ namespace ResearchAndTradeOptimization.Tests
                 AssertCalls(
                     show,
                     "ResearchAndTradeOptimization.Runtime.TradeResourceStateRuntime",
-                    "GetOrCreateBackground");
+                    "GetOrCreateHighlightFrame");
                 AssertCalls(show, "UnityEngine.UI.Graphic", "set_color");
 
                 var create = FindMethod(
                     module,
                     runtime.FullName,
-                    "GetOrCreateBackground");
+                    "CreateHighlightFrame");
                 AssertCalls(create, "UnityEngine.GameObject", ".ctor");
                 AssertCalls(create, "UnityEngine.Transform", "SetParent");
                 AssertCalls(create, "UnityEngine.Transform", "SetAsFirstSibling");
