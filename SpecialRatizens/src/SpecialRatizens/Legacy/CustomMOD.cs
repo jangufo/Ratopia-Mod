@@ -1785,6 +1785,7 @@ namespace RatopiaMod
         static void LoadCitizenDatas()
         {
             SpecialCitizens.Clear();
+            usedNames.Clear();
 
             SpecialCitizenSkins.Clear();
 
@@ -1803,8 +1804,8 @@ namespace RatopiaMod
                 CitizenDesires.Add(citizen, new CitizenDesireThreshold(citizen));
 
                 //添加市民名称
-                if (!citizen.m_UnitName.Trim().Equals("") && usedNames.IndexOf(citizen.m_UnitName) == -1)
-                    usedNames.Add(citizen.m_UnitName);
+                if (!string.IsNullOrWhiteSpace(citizen.m_UnitName) && !SpecialNamePolicy.IsTaken(citizen.m_UnitName, usedNames))
+                    usedNames.Add(SpecialNamePolicy.Normalize(citizen.m_UnitName));
 
                 //特殊市民加载
                 if (!TryGetSpecialUnit(citizen, out CustomSpecialUnit unit) || !AddSpecialCitizen(unit, citizen))
@@ -2768,8 +2769,11 @@ namespace RatopiaMod
 
             SpecialCitizens.Add(citizen.m_UnitName, citizen);
 
-            //标记单位已出现
+            //标记单位已出现，并让后续普通姓名生成也避开该名称。
             unit.isUsed = true;
+            string normalizedName = SpecialNamePolicy.Normalize(unit.name);
+            if (normalizedName.Length > 0 && !SpecialNamePolicy.IsTaken(normalizedName, usedNames))
+                usedNames.Add(normalizedName);
 
             unit.pdr_C = 0;
 
@@ -2858,7 +2862,11 @@ namespace RatopiaMod
 
             List<CustomSpecialUnit> units = CustomSpecialUnitDatas.Values.ToList();
             List<SpecialCandidateState> states = units.Select(unit =>
-                new SpecialCandidateState(unit.name, unit.grade, unit.probability, unit.isUsed)
+                new SpecialCandidateState(
+                    unit.name,
+                    unit.grade,
+                    unit.probability,
+                    unit.isUsed || SpecialNamePolicy.IsTaken(unit.name, usedNames))
                 {
                     ProbabilityBonus = unit.pdr_C
                 }).ToList();
@@ -2886,6 +2894,14 @@ namespace RatopiaMod
         {
             if (ActiveCustomSpecialUnit && specialUnit != null)
             {
+                // The immigration preview can be rebuilt before the previous candidate is recruited.
+                // Do not create another citizen whose visible name already exists in this save.
+                if (SpecialNamePolicy.IsTaken(specialUnit.name, Citizens.Select(citizen => citizen.m_UnitName)))
+                {
+                    Debug.LogWarning($"跳过重复特殊鼠鼠名称 {specialUnit.name}");
+                    specialUnit = null;
+                    return true;
+                }
                 __instance.List_CharInfo = new List<int>();
 
                 __instance.m_Gender = specialUnit.gender;

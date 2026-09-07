@@ -1,0 +1,27 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- AssemblyName 在各个项目文件中定义，因此安装目录放到 targets 阶段计算。 -->
+    <RatopiaPluginInstallDir>$(RatopiaDir)\BepInEx\plugins\$(AssemblyName)</RatopiaPluginInstallDir>
+  </PropertyGroup>
+
+  <Target Name="InstallRatopiaMod"
+          AfterTargets="Build"
+          Condition="'$(Configuration)' == 'Release' and '$(DisableRatopiaModInstall)' != 'true'">
+    <Message Importance="high"
+             Text="Installing $(AssemblyName) to $(RatopiaPluginInstallDir)" />
+
+    <MakeDir Directories="$(RatopiaPluginInstallDir)" />
+
+    <ItemGroup>
+      <RatopiaModInstallFiles Include="$(TargetPath)" />
+      <RatopiaModInstallFiles Include="$(TargetDir)translate-kv.json"
+                              Condition="Exists('$(TargetDir)translate-kv.json')" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(RatopiaModInstallFiles)"
+          DestinationFiles="@(RatopiaModInstallFiles->'$(RatopiaPluginInstallDir)\%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

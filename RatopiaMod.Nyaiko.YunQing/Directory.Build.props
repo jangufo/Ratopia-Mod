@@ -1,0 +1,59 @@
+<Project>
+
+  <!-- 所有 Ratopia mod 项目的公共构建配置。 -->
+  <PropertyGroup>
+    <RatopiaDir Condition="'$(RatopiaDir)' == ''">$(RATOPIA_DIR)</RatopiaDir>
+    <BepInExCoreDir>$(RatopiaDir)\BepInEx\core</BepInExCoreDir>
+    <GameManagedDir>$(RatopiaDir)\Ratopia_Data\Managed</GameManagedDir>
+
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <Target Name="ValidateRatopiaInstallation"
+          BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(RatopiaDir)' == ''"
+           Text="RATOPIA_DIR is not set. Set it to your Ratopia installation directory." />
+    <Error Condition="'$(RatopiaDir)' != '' and !Exists('$(RatopiaDir)')"
+           Text="The Ratopia directory does not exist: $(RatopiaDir)" />
+    <Error Condition="'$(RatopiaDir)' != '' and !Exists('$(BepInExCoreDir)')"
+           Text="The BepInEx core directory does not exist: $(BepInExCoreDir)" />
+    <Error Condition="'$(RatopiaDir)' != '' and !Exists('$(GameManagedDir)')"
+           Text="The Ratopia managed directory does not exist: $(GameManagedDir)" />
+  </Target>
+
+  <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExCoreDir)\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExCoreDir)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(GameManagedDir)\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(GameManagedDir)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(GameManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(GameManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(GameManagedDir)\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

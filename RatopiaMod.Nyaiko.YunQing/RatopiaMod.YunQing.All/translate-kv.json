@@ -1,0 +1,814 @@
+[
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/GoldCheat/Txt",
+    "Item2": "获得30000金币"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/ResCheat/Txt",
+    "Item2": "资源+10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/ResCheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/ResCheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/TechPointCheat/Txt",
+    "Item2": "研究点+5"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/CitizenDmg_Cheat/Txt",
+    "Item2": "市民受到攻击\n体力-5"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/DayTimeSwap_Btn/Txt",
+    "Item2": "昼夜切换"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/CitizenGold_Cheat/Txt",
+    "Item2": "市民金币+200"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/MakeZombie_Cheat/Txt",
+    "Item2": "从僵尸洞\n生成僵尸"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/KillZombie_Cheat/Txt",
+    "Item2": "消灭所有僵尸"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/Stat_Cheat/P_Exp_Cheat/Txt",
+    "Item2": "力量+300"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/Stat_Cheat/D_Exp_Cheat/Txt",
+    "Item2": "敏捷+300"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/Stat_Cheat/I_Exp_Cheat/Txt",
+    "Item2": "智力+300"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/Stat_Cheat/Toggle/Txt (1)",
+    "Item2": "作用于女王"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/BuildingAtk_Cheat/Txt",
+    "Item2": "建筑伤害"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/BuildingAtk_Cheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/BuildingAtk_Cheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/CC_Cheat/Txt",
+    "Item2": "移民\n立刻到来"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/Q_Unlock_Cheat/Txt",
+    "Item2": "解锁指令"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/CitizenAttacked_Cheat/Txt",
+    "Item2": "市民受到攻击"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/MakeCitizen_Cheat/Txt",
+    "Item2": "生成市民"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/UpdateGrade_Cheat/Txt",
+    "Item2": "更新阶层"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/GameSave_Cheat/Txt",
+    "Item2": "存档文件\n单独保存(F5)"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/BP_SkipCheat/Txt",
+    "Item2": "跳过蓝图\n立即建造"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/MakeGradeCheat/LowGradeBtn/Txt",
+    "Item2": "贫困阶级"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/MakeGradeCheat/MidGradeBtn/Txt",
+    "Item2": "中产阶级"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/MakeGradeCheat/HighGradeBtn/Txt",
+    "Item2": "上层阶级"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/TObj_Clear_Cheat/Txt",
+    "Item2": "删除未拾取资源"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/NeedsCheat/FatigueBtn/Txt",
+    "Item2": "疲劳+10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/NeedsCheat/FunBtn/Txt",
+    "Item2": "趣味+10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/NeedsCheat/CleanBtn/Txt",
+    "Item2": "清洁+10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/NeedsCheat/HungerBtn/Txt",
+    "Item2": "饱食+10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/AutoSaveOff_Cheat/Txt",
+    "Item2": "关闭自动存档"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/UI_Off_Cheat/Txt",
+    "Item2": "关闭/开启UI"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/Demo_Off_Cheat/Txt",
+    "Item2": "关闭Demo"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/FOG_Off_Cheat/Txt",
+    "Item2": "关闭战争迷雾"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/EnemyAttacked_Cheat/Txt",
+    "Item2": "敌人受到攻击"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/EnemyAttacked_Cheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/EnemyAttacked_Cheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/ResearchFast_Cheat/Txt",
+    "Item2": "研究耗时为0"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/Q_Smith_NoMat_Cheat/Txt",
+    "Item2": "皇家铁匠铺\n不需要材料"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/BuildEnable3_Cheat/Txt",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/NoNeedMat_Cheat/Txt",
+    "Item2": "建造无需材料"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/UnlockAll_Research_Cheat/Txt",
+    "Item2": "解锁全部研究"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/BuildEnableSwap_Cheat/Txt",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main/MakeCitizen_Cheat (1)/Txt",
+    "Item2": "生成市民x10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/SeasonChangeCheat/SpringBtn/Txt",
+    "Item2": "季节：春"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/SeasonChangeCheat/SummerBtn/Txt",
+    "Item2": "季节：夏"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/SeasonChangeCheat/FallBtn/Txt",
+    "Item2": "季节：秋"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/SeasonChangeCheat/WinterBtn/Txt",
+    "Item2": "季节：冬"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/SttIcon_Cheat/Txt",
+    "Item2": "统计图标解锁"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat/Txt",
+    "Item2": "生成兔子"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (1)/Txt",
+    "Item2": "生成蜜蜂"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (2)/Txt",
+    "Item2": "生成蝙蝠"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (3)/Txt",
+    "Item2": "生成蚕"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (4)/Txt",
+    "Item2": "生成鱼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (5)/Txt",
+    "Item2": "生成小蜘蛛"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (6)/Txt",
+    "Item2": "生成犰狳"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (7)/Txt",
+    "Item2": "生成青蛙"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (8)/Txt",
+    "Item2": "生成蝎子"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (9)/Txt",
+    "Item2": "生成蜘蛛"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (10)/Txt",
+    "Item2": "生成宝石金龟"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (11)/Txt",
+    "Item2": "生成寄居蟹"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (12)/Txt",
+    "Item2": "生成蜗牛"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (13)/Txt",
+    "Item2": "生成鱼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/Rebellion_Cheat/Txt",
+    "Item2": "切换为叛乱状态"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/Prosperity_Cheat/Txt",
+    "Item2": "刷新繁荣值"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeZombie_Cheat/Txt",
+    "Item2": "生成丧尸鼠"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeSpitter_Cheat/Txt",
+    "Item2": "生成炮击鼠"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeWeasel_Cheat/Txt",
+    "Item2": "生成枪兵黄鼠狼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeOverlord_Cheat/Txt",
+    "Item2": "生成挖地鼠"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeZombieHole_Cheat/Txt",
+    "Item2": "生成瘟疫鼠之穴"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/ProsperityLevelUp_Cheat/Txt",
+    "Item2": "繁荣等级+1"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/ProsperityLevelDown_Cheat/Txt",
+    "Item2": "繁荣等级-1"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/CountryGoldDown/Txt",
+    "Item2": "国库-500金币"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/CitizenDownGoldBtn/Txt",
+    "Item2": "市民-100金币"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/QueenInvincibilityBtn/Txt",
+    "Item2": "女王无敌"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/CitizenInvincibilityBtn/Txt",
+    "Item2": "市民无敌"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MilTrainingSkipBtn/Txt",
+    "Item2": "市民士兵训练\n立即完成"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeFunnyMon_Cheat/Txt",
+    "Item2": "生成欢乐花兽"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeJumpZombie_Cheat/Txt",
+    "Item2": "生成飞鼠"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeBomberRat_Cheat/Txt",
+    "Item2": "生成爆破鼠"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/BuildingShield_Cheat/Txt",
+    "Item2": "建筑无敌"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/ProsperityPointUp_Cheat/Txt",
+    "Item2": "繁荣度积分\n+5000"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeWeasel_Pathfinder_Cheat/Txt",
+    "Item2": "生成引路黄鼠狼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeWeasel_Kidnapper_Cheat/Txt",
+    "Item2": "生成绑架黄鼠狼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeWeasel_Magician_Cheat/Txt",
+    "Item2": "生成巫师黄鼠狼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeWeasel_HeavyArmor_Cheat/Txt",
+    "Item2": "生成壮汉黄鼠狼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeWeasel_Assassin_Cheat/Txt",
+    "Item2": "生成毒黄鼠狼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (14)/Txt",
+    "Item2": "生成羽毛甲虫"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (1)/MakeAnimal_Cheat (15)/Txt",
+    "Item2": "生成蝗虫"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/QuestClear_Cheat/Txt",
+    "Item2": "重置任务记录"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/HungerLose_Cheat/Txt",
+    "Item2": "饱食-10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/CleanLose_Cheat/Txt",
+    "Item2": "清洁-10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/FunLose_Cheat/Txt",
+    "Item2": "趣味-10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/FatigueLose_Cheat/Txt",
+    "Item2": "疲劳-10"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/HappyUpBuff_Cheat/Txt",
+    "Item2": "幸福度+5\n(12小时)"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/HappyDownBuff_Cheat/Txt",
+    "Item2": "幸福度-5\n(12小时)"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/CitizenWanderX_Cheat/Txt",
+    "Item2": "禁止市民游荡"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/RebellionX_Cheat/Txt",
+    "Item2": "禁止市民叛乱"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/DayPass_Cheat/Txt",
+    "Item2": "时间+1天"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/QueenTeleport_Cheat/Txt",
+    "Item2": "女王瞬移"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/SetRebellion_Cheat/Txt",
+    "Item2": "指定市民叛乱"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Welfare_Cheat/Txt",
+    "Item2": "立即发放补助金"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/CitizenCamChasing/Txt",
+    "Item2": "市民镜头跟踪"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/PropertyTaxUpdate_Cheat/Txt",
+    "Item2": "资产、税收\n幸福度更新"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/BankLoanUpdate_Cheat/Txt",
+    "Item2": "更新贷款产品"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Drought_Cheat/Txt",
+    "Item2": "自然灾祸：干旱"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Rainy_Cheat/Txt",
+    "Item2": "天气：下雨"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Snowing_Cheat/Txt",
+    "Item2": "天气：下雪"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Storm_Cheat/Txt",
+    "Item2": "自然灾祸：风暴"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Blizzard_Cheat/Txt",
+    "Item2": "自然灾祸：暴雪"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/DungeonClear_Cheat/Txt",
+    "Item2": "通关地下城"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Event_Cheat/Txt",
+    "Item2": "事件"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Event_Cheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Event_Cheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/TileDmg_Cheat/Txt",
+    "Item2": "地块10点伤害"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/SkillInit_Cheat/Txt",
+    "Item2": "重置技能冷却"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/MakeFire_Cheat/Txt",
+    "Item2": "在地块上生火"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/CameraCullOff_Cheat/Txt",
+    "Item2": "关闭镜头剔除"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/MakeCriminal_Cheat/Txt",
+    "Item2": "变成罪犯"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/AlmostDevil_Cheat/Txt",
+    "Item2": "犯罪概率100%"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Devil100_Cheat/Txt",
+    "Item2": "赋予内部冲突100%"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (2)/Swarm_Cheat/Txt",
+    "Item2": "自然灾祸：虫群"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TaxCheat/Txt",
+    "Item2": "对市民施加税法"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/WaveCall_Cheat/Txt",
+    "Item2": "立即触发敌人波次"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TObj_Delete_Cheat/Txt",
+    "Item2": "所选资源\n消失冷却完成"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/AccelBoxOn_Cheat/Txt",
+    "Item2": "打开加速箱"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeAnimal_Cheat (13)/Txt",
+    "Item2": "生成甲虫"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TeamHeal_Cheat/Txt",
+    "Item2": "全体友军治疗50"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/QueenTransparent_Cheat/Txt",
+    "Item2": "女王隐身"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/ZoomLock_Cheat/Txt",
+    "Item2": "解除缩放限制"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/UnlockAllQueenItem_Cheat/Txt",
+    "Item2": "女王获得\n全部道具"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/AllExplore_Cheat/Txt",
+    "Item2": "全部探索完成"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TradingProsper_Cheat/Txt",
+    "Item2": "贸易繁荣度增减"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TradingProsper_Cheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TradingProsper_Cheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TradingRelation_Cheat/Txt",
+    "Item2": "贸易友好度增减"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TradingRelation_Cheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/TradingRelation_Cheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeGBot_Cheat/Txt",
+    "Item2": "生成鼠机器人"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeRatfiend_Cheat/Txt",
+    "Item2": "生成地狱鬼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/InfinityElec_Cheat/Txt",
+    "Item2": "无需电力"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeAnimal_Cheat (14)/Txt",
+    "Item2": "生成火焰水母"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeAnimal_Cheat (15)/Txt",
+    "Item2": "生成喷火鱼"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/ChangeBuildMatToPileMat_Cheat/Txt",
+    "Item2": "攻击建筑材料变更"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/NoDurability_Cheat/Txt",
+    "Item2": "耐久度不减少"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeLizard_Pathfinder_Cheat/Txt",
+    "Item2": "生成蜥蜴工兵"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeLizard_Axe_Cheat/Txt",
+    "Item2": "生成蜥蜴斧兵"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeLizard_Sword_Cheat/Txt",
+    "Item2": "生成蜥蜴大剑兵"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeLizard_Bow_Cheat/Txt",
+    "Item2": "生成蜥蜴大弓兵"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeLizard_Armor_Cheat/Txt",
+    "Item2": "生成蜥蜴重甲兵"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeArmyGBot_Cheat/Txt",
+    "Item2": "生成军用鼠机器人"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeLizard_SmallCitizen_Cheat/Txt",
+    "Item2": "生成蜥蜴市民"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/WeaselSkip_Cheat/Txt",
+    "Item2": "蜥蜴主题\n分数限制取消"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/GetPileMaterial_Cheat/Txt",
+    "Item2": "法老王地下城建造\n获取材料"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/InvasionAutoBatch_Cheat/Txt",
+    "Item2": "入侵：友军自动部署"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/NexusShield_Cheat/Txt",
+    "Item2": "入侵：友军指挥所无敌"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeLizard_Elite_Cheat/Txt",
+    "Item2": "生成蜥蜴领主"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/PharaohWaveSkip_Cheat/Txt",
+    "Item2": "法老王波次\n跳过"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/BasicMummy_Cheat/Txt",
+    "Item2": "生成仆人木乃伊"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/BeastMummy_Cheat/Txt",
+    "Item2": "生成野兽木乃伊"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/PriestMummy_Cheat/Txt",
+    "Item2": "生成巫师木乃伊"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/AtkMummy_Cheat/Txt",
+    "Item2": "生成士兵木乃伊"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/Atk2Mummy_Cheat/Txt",
+    "Item2": "生成近卫队木乃伊"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeLizard_Assassin_Cheat/Txt",
+    "Item2": "生成不是蜥蜴"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (3)/MakeSkullRat_Cheat/Txt",
+    "Item2": "生成骷髅鼠"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeLizard_Pathfinder_Cheat/Txt",
+    "Item2": "生成敌国佣兵"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeBoneMedal_Cheat/Txt",
+    "Item2": "获得骨牙(500)"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/ProsReroll_Cheat/Txt",
+    "Item2": "里程碑刷新+5"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeAllFood_Cheat/Txt",
+    "Item2": "制作所有女王料理\nx5"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/FixProsDir_Cheat/Txt",
+    "Item2": "里程碑"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/FixProsDir_Cheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/FixProsDir_Cheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeDarkReligion/Txt",
+    "Item2": "黑暗教众\n(点击)"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeHalloweenGhost/Txt",
+    "Item2": "生成万圣节幽灵"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeCitizenGhost/Txt",
+    "Item2": "生成幽灵市民"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeDiseaseLv1/Txt",
+    "Item2": "市民疾病Lv1"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeDiseaseLv2/Txt",
+    "Item2": "市民疾病Lv2"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeDiseaseLv3/Txt",
+    "Item2": "市民疾病Lv3"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/GetPuck_Cheat/Txt",
+    "Item2": "获得Puck"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/GetPuck_Cheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/GetPuck_Cheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/GetDar_Cheat/Txt",
+    "Item2": "获得Dar"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/GetDar_Cheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/GetDar_Cheat/InputField/Text",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/ActionLogFileDelete/Txt",
+    "Item2": "删除行为日志"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/EventChoicePass/Txt",
+    "Item2": "所有事件\n选项可选"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeSoul/Txt",
+    "Item2": "生产灵魂300"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeSunCitizen/Txt",
+    "Item2": "净化教众\n(点击)"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/Stat_Cheat/P_lv_Cheat/Txt",
+    "Item2": "女王力量\n升级"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/Stat_Cheat/D_lv_Cheat/Txt",
+    "Item2": "女王敏捷\n升级"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/Stat_Cheat/I_lv_Cheat/Txt",
+    "Item2": "女王智力\n升级"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/EncyclopediaUnlock/Txt",
+    "Item2": "解锁百科"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/GetQueenAbilityPoint/Txt",
+    "Item2": "Puck点数+1"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/GetShrew/Txt",
+    "Item2": "获得鼩鼱"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/TourCountFix/Txt",
+    "Item2": "游客数量固定为3"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/MakeTourist/Txt",
+    "Item2": "召唤游客"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/AllUnlockArtifacts/Txt",
+    "Item2": "登记全部发现物"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/TouristGetMoney/Txt",
+    "Item2": "游客持有金\n9999"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/ResCheat/Txt",
+    "Item2": "添加发现物"
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/ResCheat/InputField/Placeholder",
+    "Item2": ""
+  },
+  {
+    "Item1": "MainUI@CheatMgr/Canvas(Cheat) (Default Off)/CheatMgr/Obj_Main (4)/ResCheat/InputField/Text",
+    "Item2": ""
+  }
+]
