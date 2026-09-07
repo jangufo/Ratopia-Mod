@@ -48,7 +48,7 @@ v3.0.0
 
 ```powershell
 # 在已安装 Ratopia 的本机生成依赖包
-powershell -ExecutionPolicy Bypass -File .\RatopiaMod.Nyaiko.YunQing\scripts\package-ci-dependencies.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\package-ci-dependencies.ps1
 ```
 
 生成的 `RatopiaMod.Nyaiko.YunQing\artifacts\ratopia-ci-deps.zip` 包含 `BepInEx/core` 和 `Ratopia_Data/Managed` 下的必要引用 DLL。当前 CI 使用私有依赖仓库 `jangufo/ratopia-ci-deps` 的 `deps-v1` Release；不要提交或公开发布这些游戏文件。
@@ -56,9 +56,14 @@ powershell -ExecutionPolicy Bypass -File .\RatopiaMod.Nyaiko.YunQing\scripts\pac
 本仓库已配置两个 Actions secrets：
 
 - `RATOPIA_DEPS_REPO`：`jangufo/ratopia-ci-deps`
-- `RATOPIA_DEPS_TOKEN`：对该私有仓库有 Contents: Read-only 权限的 token
+- `RATOPIA_DEPS_TOKEN`：workflow 用来读取私有依赖仓库的 token
 
-游戏版本或引用 DLL 变化时，重新运行上述脚本，并将新的 `ratopia-ci-deps.zip` 上传到私有依赖仓库的 `deps-v1` Release。
+游戏更新后，可以直接双击仓库根目录下的 `scripts\update-ratopia-ci-deps.cmd`。它会比较当前 `Assembly-CSharp.dll` 的 SHA256 与 `scripts\Assembly-CSharp.sha256`：
+
+- 一致：不做任何更新；
+- 不一致：重新收集引用 DLL，替换私有依赖仓库 `deps-v1` Release 中的 `ratopia-ci-deps.zip`，并把新的 SHA256 写回 `scripts\Assembly-CSharp.sha256`。
+
+一键更新脚本需要本机环境变量 `GITHUB_TOKEN` 具备私有依赖仓库的写入权限。更新成功后，请提交并推送 `scripts\Assembly-CSharp.sha256` 的变化。
 
 可手动运行 `.github/workflows/ratopia-mod-nyaiko-yunqing.yml` 获取构建产物；也可以推送 `yunqing-v*` 格式的 tag（例如 `yunqing-v3.0.0`），工作流会自动创建 GitHub Release 并上传 `RatopiaMod.YunQing.All-v版本号.zip`。该 zip 内部保留 `BepInEx/plugins/RatopiaMod.YunQing.All/` 路径，可直接解压到 Ratopia 根目录。
 

@@ -13,7 +13,8 @@ if (-not $RatopiaDir) {
 }
 
 $RatopiaDir = (Resolve-Path $RatopiaDir).Path
-$projectRoot = Split-Path -Parent $PSScriptRoot
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$projectRoot = Join-Path $repoRoot 'RatopiaMod.Nyaiko.YunQing'
 if (-not $OutputZip) {
     $OutputZip = Join-Path $projectRoot 'artifacts\ratopia-ci-deps.zip'
 }
