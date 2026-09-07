@@ -26,6 +26,8 @@
   </Target>
 
   <ItemGroup>
+    <!-- Allows net472 projects to compile on Linux GitHub-hosted runners. -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
     <Reference Include="BepInEx">
       <HintPath>$(BepInExCoreDir)\BepInEx.dll</HintPath>
       <Private>false</Private>

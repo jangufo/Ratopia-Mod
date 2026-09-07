@@ -42,3 +42,24 @@
 
 v3.0.0
 云清把源码添加到奈娅子仓库中新发布的版本
+## GitHub Actions 构建与发布
+
+本仓库没有提交游戏 DLL。`RATOPIA_DIR` 在 Actions 中会指向一个临时目录，目录里只放编译所需的引用 DLL：
+
+```powershell
+# 在已安装 Ratopia 的本机生成依赖包
+powershell -ExecutionPolicy Bypass -File .\RatopiaMod.Nyaiko.YunQing\scripts\package-ci-dependencies.ps1
+```
+
+生成的 `RatopiaMod.Nyaiko.YunQing\artifacts\ratopia-ci-deps.zip` 包含 `BepInEx/core` 和 `Ratopia_Data/Managed` 下的必要引用 DLL。当前 CI 使用私有依赖仓库 `jangufo/ratopia-ci-deps` 的 `deps-v1` Release；不要提交或公开发布这些游戏文件。
+
+本仓库已配置两个 Actions secrets：
+
+- `RATOPIA_DEPS_REPO`：`jangufo/ratopia-ci-deps`
+- `RATOPIA_DEPS_TOKEN`：对该私有仓库有 Contents: Read-only 权限的 token
+
+游戏版本或引用 DLL 变化时，重新运行上述脚本，并将新的 `ratopia-ci-deps.zip` 上传到私有依赖仓库的 `deps-v1` Release。
+
+可手动运行 `.github/workflows/ratopia-mod-nyaiko-yunqing.yml` 获取构建产物；也可以推送 `yunqing-v*` 格式的 tag（例如 `yunqing-v3.0.0`），工作流会自动创建 GitHub Release 并上传 `RatopiaMod.YunQing.All-v版本号.zip`。该 zip 内部保留 `BepInEx/plugins/RatopiaMod.YunQing.All/` 路径，可直接解压到 Ratopia 根目录。
+
+如果不想上传任何游戏 DLL，替代方案是安装 GitHub self-hosted runner，让 runner 所在机器已安装 Ratopia，并把 `RATOPIA_DIR` 配置为 runner 环境变量；此时可以删除 workflow 里的“Download private Ratopia reference assemblies”步骤，并把 `runs-on` 改为对应的 self-hosted label。注意外部 fork PR 默认拿不到 secrets，因此依赖私有 DLL 的 CI 只适合本仓库分支触发。
