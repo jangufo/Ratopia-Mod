@@ -11,7 +11,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
-    <RatopiaDir Condition="'$(RatopiaDir)' == ''">E:\steam\steamapps\common\Ratopia</RatopiaDir>
+    <RatopiaDir Condition="'$(RatopiaDir)' == ''">$(RATOPIA_DIR)</RatopiaDir>
     <GameManagedDir>$(RatopiaDir)\Ratopia_Data\Managed</GameManagedDir>
     <BepInExCoreDir>$(RatopiaDir)\BepInEx\core</BepInExCoreDir>
   </PropertyGroup>

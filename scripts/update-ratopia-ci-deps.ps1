@@ -12,7 +12,10 @@ param(
     [string] $AssetName = 'ratopia-ci-deps.zip',
 
     [Parameter(Mandatory = $false)]
-    [string] $Token = $env:GITHUB_TOKEN
+    [string] $Token = $env:GITHUB_TOKEN,
+
+    [Parameter(Mandatory = $false)]
+    [switch] $Force
 )
 
 $ErrorActionPreference = 'Stop'
@@ -121,11 +124,15 @@ finally {
     $sha256.Dispose()
 }
 
-if ($knownHash -eq $currentHash) {
+if ($knownHash -eq $currentHash -and -not $Force) {
     Write-Host "Assembly-CSharp.dll is unchanged."
     Write-Host "SHA256: $currentHash"
     Write-Host 'No CI dependency update is required.'
     exit 0
+}
+
+if ($Force) {
+    Write-Host 'Forcing dependency bundle update.'
 }
 
 Write-Host 'Assembly-CSharp.dll has changed.'

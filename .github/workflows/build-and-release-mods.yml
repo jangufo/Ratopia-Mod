@@ -1,0 +1,105 @@
+name: Build and release Ratopia mods
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "broadcaststationglobalcoverage-v*"
+      - "equipmentreforgedodge-v*"
+      - "equipmentreforgeselector-v*"
+      - "executionplatform-v*"
+      - "godviewmanagement-v*"
+      - "heaterenhancement-v*"
+      - "multipurposeresearch-v*"
+      - "populationcustomizer-v*"
+      - "yunqing-v*"
+      - "researchandtradeoptimization-v*"
+      - "restroombathfun-v*"
+      - "sharedwarehouse-v*"
+      - "sleepacceleration-v*"
+      - "specialratizens-v*"
+      - "strongerworkdistance-v*"
+      - "superbow-v*"
+      - "wirethroughwalls-v*"
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build and package all mods
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Download private Ratopia reference assemblies
+        env:
+          GH_TOKEN: ${{ secrets.RATOPIA_DEPS_TOKEN }}
+          DEPS_REPO: ${{ secrets.RATOPIA_DEPS_REPO }}
+          DEPS_TAG: ${{ vars.RATOPIA_DEPS_TAG || 'deps-v1' }}
+        shell: bash
+        run: |
+          : "${DEPS_REPO:?Set the RATOPIA_DEPS_REPO repository secret}"
+          : "${GH_TOKEN:?Set the RATOPIA_DEPS_TOKEN repository secret}"
+          mkdir -p "$RUNNER_TEMP/ratopia"
+          gh release download "$DEPS_TAG" \
+            --repo "$DEPS_REPO" \
+            --pattern "ratopia-ci-deps.zip" \
+            --output "$RUNNER_TEMP/ratopia-ci-deps.zip"
+          unzip -q "$RUNNER_TEMP/ratopia-ci-deps.zip" -d "$RUNNER_TEMP/ratopia"
+          echo "RATOPIA_DIR=$RUNNER_TEMP/ratopia" >> "$GITHUB_ENV"
+
+      - name: Build and package all mods
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./scripts/build-all-mods.ps1 -OutputDirectory artifacts -CollectionZipName Ratopia-Mod-202609072051.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ratopia-mod-packages
+          path: |
+            artifacts/*.zip
+            artifacts/artifacts.json
+          if-no-files-found: error
+
+      - name: Resolve release metadata
+        if: startsWith(github.ref, 'refs/tags/')
+        id: release
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          slug="${tag%-v*}"
+          asset=$(jq -r --arg slug "$slug" '.mods[] | select(.releaseSlug == $slug) | .asset' artifacts/artifacts.json)
+          if [[ -z "$asset" || "$asset" == "null" ]]; then
+            echo "No package found for release slug: $slug" >&2
+            exit 1
+          fi
+          notes="docs/release-notes/${tag}.md"
+          if [[ ! -f "$notes" ]]; then
+            notes="docs/release-notes/DEFAULT.md"
+          fi
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+          echo "notes=$notes" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/${{ steps.release.outputs.asset }}
+            artifacts/Ratopia-Mod-202609072051.zip
+          body_path: ${{ steps.release.outputs.notes }}
+          fail_on_unmatched_files: true
+
