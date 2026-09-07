@@ -71,7 +71,29 @@ New-Item -ItemType Directory -Force (Split-Path -Parent $outputZip) | Out-Null
 if (Test-Path $outputZip) {
     Remove-Item $outputZip -Force
 }
-Compress-Archive -Path (Join-Path $bundleDir '*') -DestinationPath $outputZip
+
+# Compress-Archive on Windows PowerShell 5.1 emits backslash entry names,
+# which unzip on Linux rejects. Create a ZIP with forward-slash entry names.
+Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive = [System.IO.Compression.ZipFile]::Open(
+    $outputZip,
+    [System.IO.Compression.ZipArchiveMode]::Create
+)
+try {
+    foreach ($file in Get-ChildItem -Path $bundleDir -Recurse -File) {
+        $entryName = $file.FullName.Substring($bundleDir.Length).TrimStart('\', '/').Replace('\', '/')
+        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+            $archive,
+            $file.FullName,
+            $entryName,
+            [System.IO.Compression.CompressionLevel]::Optimal
+        ) | Out-Null
+    }
+}
+finally {
+    $archive.Dispose()
+}
 
 Write-Host "Copied $copied reference DLL(s)."
 Write-Host "Dependency bundle: $outputZip"
