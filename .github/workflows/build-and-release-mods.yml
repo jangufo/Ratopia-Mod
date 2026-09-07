@@ -63,7 +63,7 @@ jobs:
       - name: Build and package all mods
         shell: pwsh
         run: |
-          pwsh -NoProfile -File ./scripts/build-all-mods.ps1 -OutputDirectory artifacts -CollectionZipName Ratopia-Mod-202609072051.zip
+          pwsh -NoProfile -File ./scripts/build-all-mods.ps1 -OutputDirectory artifacts
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -92,6 +92,12 @@ jobs:
           fi
           echo "asset=$asset" >> "$GITHUB_OUTPUT"
           echo "notes=$notes" >> "$GITHUB_OUTPUT"
+          collection=$(jq -r '.collectionZip' artifacts/artifacts.json)
+          if [[ -z "$collection" || "$collection" == "null" ]]; then
+            echo "Collection package name is missing from artifacts.json" >&2
+            exit 1
+          fi
+          echo "collection=$collection" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -99,7 +105,7 @@ jobs:
         with:
           files: |
             artifacts/${{ steps.release.outputs.asset }}
-            artifacts/Ratopia-Mod-202609072051.zip
+            artifacts/${{ steps.release.outputs.collection }}
           body_path: ${{ steps.release.outputs.notes }}
           fail_on_unmatched_files: true
 

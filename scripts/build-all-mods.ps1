@@ -6,7 +6,7 @@ param(
     [string] $OutputDirectory = "",
 
     [Parameter(Mandatory = $false)]
-    [string] $CollectionZipName = 'Ratopia-Mod-202609072051.zip',
+    [string] $CollectionZipName = '',
 
     [Parameter(Mandatory = $false)]
     [switch] $SkipBuild
@@ -19,6 +19,12 @@ if (-not $OutputDirectory) {
     $OutputDirectory = Join-Path $repoRoot 'artifacts'
 }
 $OutputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
+
+if ([string]::IsNullOrWhiteSpace($CollectionZipName)) {
+    # Use Beijing time so public archive names match the maintainer's timezone.
+    $timestamp = [DateTime]::UtcNow.AddHours(8).ToString('yyyyMMddHHmm', [Globalization.CultureInfo]::InvariantCulture)
+    $CollectionZipName = "Ratopia-Mod-$timestamp.zip"
+}
 
 $releaseSlugs = @{
     'BroadcastStationGlobalCoverage' = 'broadcaststationglobalcoverage'

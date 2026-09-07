@@ -18,4 +18,4 @@
 
 ## 集合包
 
-本 Release 同时提供 `Ratopia-Mod-202609072051.zip`，包含当前仓库全部最新 mod。只需安装单个 mod 时，请下载上面的单独包。
+本 Release 同时提供 `Ratopia-Mod-<时间戳>.zip`，包含当前仓库全部最新 mod。只需安装单个 mod 时，请下载上面的单独包。
