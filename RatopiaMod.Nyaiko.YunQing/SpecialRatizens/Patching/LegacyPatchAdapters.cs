@@ -38,6 +38,22 @@ namespace SpecialRatizens.Patching
             Run("generation.citizen-created", () => CustomMOD.T_Citizen_MakeCtizen_ByCC(__instance, _info));
         }
 
+        public static bool CitizenCaveUI_GetRandomName(Gender _gender, ref string __result)
+        {
+            try { return CustomMOD.CitizenCaveUI_GetRandomName(_gender, ref __result); }
+            catch (Exception error) { return FailOpen("names.random-name", error); }
+        }
+
+        public static void CitizenCaveUI_MakeCitizenList_CustomName()
+        {
+            Run("names.list-reset", CustomMOD.CitizenCaveUI_MakeCitizenList_CustomName);
+        }
+
+        public static void T_Citizen_MakeCtizen_ByCC_CustomName(T_Citizen __instance, CCMake_Info _info)
+        {
+            Run("names.citizen-recorded", () => CustomMOD.T_Citizen_MakeCtizen_ByCC_CustomName(__instance, _info));
+        }
+
         public static void PlayDataMgr_LoadData(D_Data data)
         {
             Run("save.data-loaded", () => CustomMOD.PlayDataMgr_LoadData(data));

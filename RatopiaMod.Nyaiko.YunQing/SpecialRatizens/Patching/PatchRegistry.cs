@@ -45,6 +45,10 @@ namespace SpecialRatizens.Patching
                 Prefix("generation.default-trait-boundary", () => Method(typeof(CCMake_Info), "MakeCharacterList"), "CCMake_Info_MakeCharacterList"),
                 Postfix("generation.citizen-created", () => Method(typeof(T_Citizen), "MakeCtizen_ByCC", typeof(Vector2), typeof(CCMake_Info)), "T_Citizen_MakeCtizen_ByCC"),
 
+                Prefix("names.random-name", () => Method(typeof(CitizenCaveUI), "GetRandomName", typeof(Gender)), "CitizenCaveUI_GetRandomName"),
+                Postfix("names.list-reset", () => Method(typeof(CitizenCaveUI), "MakeCitizenList"), "CitizenCaveUI_MakeCitizenList_CustomName"),
+                Postfix("names.citizen-recorded", () => Method(typeof(T_Citizen), "MakeCtizen_ByCC", typeof(Vector2), typeof(CCMake_Info)), "T_Citizen_MakeCtizen_ByCC_CustomName"),
+
                 Postfix("save.data-loaded", () => Method(typeof(PlayDataMgr), "LoadData", typeof(D_Data)), "PlayDataMgr_LoadData"),
                 Postfix("save.mods-set", () => Method(typeof(PlayDataMgr), "SetMods", typeof(string[])), "PlayDataMgr_SetMods"),
 

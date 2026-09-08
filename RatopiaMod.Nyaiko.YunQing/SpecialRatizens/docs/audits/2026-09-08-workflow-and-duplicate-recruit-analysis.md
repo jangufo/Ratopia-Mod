@@ -226,3 +226,13 @@
 - Debug 构建 0 警告 0 错误；region 12/12 平衡、大括号 556/556 平衡。
 - 全项目残留扫描：`LegacySettings` / `NewCitizenGenderLimit` / `NameTableStore` / `GameSaveCustomSet` / `CitizenCustomSkins` / `Defines*` / `UtopiaMode` 等 60+ 个已删符号 0 命中。
 - 反射冒烟测试（真实游戏程序集 + BepInEx core + 编译产物）：37 个保留方法、9 个核心字段全部存在；17 个代表性遗留方法确认从产物中消失；`ModConfig` 仅剩 `Enabled`。
+
+### 11.6 修订：恢复名称表与「更多姓名」（用户要求）
+
+- 恢复 `Core/NameTableStore.cs` 与 `Data/Names.json`（git 从上一提交还原）；`CustomMOD` 恢复「名称表」region（`NameTables` / `CustomSurNames`）与「更多名称」region（`PerNames_Female/Male`、`tempUsedNames`、三个处理器）。`usedNames` 字段沿用 §10.3 修复时写入数据加载 region 的版本，避免重复定义。
+- **接活补丁**：这三个处理器在迁移后从未注册 Harmony 补丁（`ActiveCustomNames` 读 LegacySettings 默认 false），本次按标准模式补齐——
+  - `names.random-name`（prefix）→ `CitizenCaveUI.GetRandomName(Gender)`：用 `Data/Names.json` 生成中文姓名，避开 `usedNames` 与本批次 `tempUsedNames`；
+  - `names.list-reset`（postfix）→ `CitizenCaveUI.MakeCitizenList`：每次生成移民列表清空本批次用名；
+  - `names.citizen-recorded`（postfix）→ `T_Citizen.MakeCtizen_ByCC`：普通移民落名后记入 `usedNames`（特殊鼠鼠的名字由 `AddSpecialCitizen` 负责登记，处理器内部对特殊鼠鼠跳过）。
+- 开关：`ModConfig` 新增 `General.CustomNames`（默认 `true`），`CustomMOD.ActiveCustomNames` 只读直读配置。
+- 补丁总数 40 → 43；Debug 构建 0 警告 0 错误；反射冒烟测试确认三个处理器、`NameTableStore`、`ModConfig.CustomNames` 与适配器全部就位，`Data/Names.json` 随构建复制到输出目录。

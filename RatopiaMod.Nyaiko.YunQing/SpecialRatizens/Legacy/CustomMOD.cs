@@ -34,6 +34,20 @@ namespace RatopiaMod
 {
     public class CustomMOD : BaseUnityPlugin
     {
+        #region 名称表
+
+        /// <summary>
+        /// 「更多名称」姓名表：从 Data/Names.json 惰性加载（首次访问才读文件）。
+        /// </summary>
+        readonly static NameTableStore NameTables = new NameTableStore(() => CustomDataPath);
+
+        /// <summary>
+        /// 姓氏
+        /// </summary>
+        static string[] CustomSurNames { get { return NameTables.SurNames; } }
+
+        #endregion
+
         #region 官方引用
 
         /// <summary>
@@ -185,6 +199,11 @@ namespace RatopiaMod
         /// 特殊鼠鼠功能总开关（BepInEx 配置，替代旧 GUI 设置）。
         /// </summary>
         static bool ActiveCustomSpecialUnit { get { return ModConfig.Instance != null && ModConfig.Instance.Enabled.Value; } }
+
+        /// <summary>
+        /// 「更多名称」随机姓名开关（BepInEx 配置）。
+        /// </summary>
+        static bool ActiveCustomNames { get { return ModConfig.Instance != null && ModConfig.Instance.CustomNames.Value; } }
         /// <summary>
         /// 由独立 BepInEx 5 入口配置。此兼容核心自身不会注册插件或自动安装补丁。
         /// </summary>
@@ -510,6 +529,109 @@ namespace RatopiaMod
         /// 初始特性2数量
         /// </summary>
         static int DefaultChar2Count = 0;
+
+        #region 更多名称
+
+        static string[][] CustomNames_Female;
+        static string[][] PerNames_Female
+        {
+            get
+            {
+                if (CustomNames_Female == null)
+                {
+                    CustomNames_Female = new string[2][];
+
+                    CustomNames_Female[0] = NameTables.FemaleOneChar;
+
+                    CustomNames_Female[1] = NameTables.FemaleTwoChar;
+                }
+
+                return CustomNames_Female;
+            }
+        }
+
+        static string[][] CustomNames_Male;
+        static string[][] PerNames_Male
+        {
+            get
+            {
+                if (CustomNames_Male == null)
+                {
+                    CustomNames_Male = new string[2][];
+
+                    CustomNames_Male[0] = NameTables.MaleOneChar;
+
+                    CustomNames_Male[1] = NameTables.MaleTwoChar;
+                }
+
+                return CustomNames_Male;
+            }
+        }
+
+        /// <summary>
+        /// 单次移民中所有用到的名字
+        /// </summary>
+        static List<string> tempUsedNames = new List<string>();
+
+        /// <summary>
+        /// 获得随机姓名
+        /// </summary>
+        /// <param name="_gender"></param>
+        /// <param name="__result"></param>
+        /// <returns></returns>
+        public static bool CitizenCaveUI_GetRandomName(Gender _gender, ref string __result)
+        {
+            if (!ActiveCustomNames)
+                return true;
+
+            string name;
+
+            do
+            {
+                string surName = CustomSurNames[RandomInt(0, CustomSurNames.Length)];
+
+                int index = RandomInt(0, 2);
+
+                string[] perNames = _gender == Gender.Female ? PerNames_Female[index] : PerNames_Male[index];
+
+                name = $"{surName}{perNames[RandomInt(0, perNames.Length)]}";
+            }
+            while (tempUsedNames.IndexOf(name) != -1 || usedNames.IndexOf(name) != -1);
+
+            tempUsedNames.Add(name);
+
+            __result = name;
+
+            return false;
+        }
+
+        /// <summary>
+        /// 生成移民列表
+        /// </summary>
+        public static void CitizenCaveUI_MakeCitizenList_CustomName()
+        {
+            if (!ActiveCustomNames)
+                return;
+
+            tempUsedNames.Clear();
+        }
+
+        /// <summary>
+        /// 生成市民
+        /// </summary>
+        /// <param name="__instance"></param>
+        /// <param name="_info"></param>
+        public static void T_Citizen_MakeCtizen_ByCC_CustomName(T_Citizen __instance, CCMake_Info _info)
+        {
+            if (!ActiveCustomNames || TryGetSpecialUnit(__instance, out _))
+                return;
+
+            usedNames.Add(_info.Name);
+
+            Debug.Log($"添加了自定义市民 {_info.Name}");
+        }
+
+        #endregion
 
         /// <summary>
         /// 已被占用的单位名（含普通市民与特殊鼠鼠）

@@ -17,6 +17,8 @@ namespace SpecialRatizens.Configuration
 
             Enabled = config.Bind("General", "Enabled", true,
                 "启用特殊鼠鼠的生成与特性效果。关闭时仍注册特性定义，以便读取已有存档。");
+            CustomNames = config.Bind("General", "CustomNames", true,
+                "启用「更多名称」：移民与随机市民从 Data/Names.json 生成中文姓名，并避开当前存档已占用的名字。");
 
             Instance = this;
         }
@@ -25,5 +27,8 @@ namespace SpecialRatizens.Configuration
 
         /// <summary>启用特殊鼠鼠</summary>
         public ConfigEntry<bool> Enabled { get; }
+
+        /// <summary>启用更多名称</summary>
+        public ConfigEntry<bool> CustomNames { get; }
     }
 }
