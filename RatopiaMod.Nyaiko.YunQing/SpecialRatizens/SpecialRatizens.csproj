@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net472</TargetFramework>
+		<AssemblyName>SpecialRatizens</AssemblyName>
+		<RootNamespace>SpecialRatizens</RootNamespace>
+		<Version>0.1.5</Version>
+		<AssemblyVersion>0.1.5.0</AssemblyVersion>
+		<FileVersion>0.1.5.0</FileVersion>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<NoWarn>$(NoWarn);8321</NoWarn>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<Reference Include="Utility.Savable.SavableData" HintPath="$(GameManagedDir)\Utility.Savable.SavableData.dll" Private="false" />
+		<Reference Include="LitJson" HintPath="$(GameManagedDir)\LitJson.dll" Private="false" />
+		<Reference Include="Newtonsoft.Json" HintPath="$(GameManagedDir)\Newtonsoft.Json.dll" Private="false" />
+		<Reference Include="spine-csharp" HintPath="$(GameManagedDir)\spine-csharp.dll" Private="false" />
+		<Reference Include="Unity.InputSystem" HintPath="$(GameManagedDir)\Unity.InputSystem.dll" Private="false" />
+		<Reference Include="Unity.TextMeshPro" HintPath="$(GameManagedDir)\Unity.TextMeshPro.dll" Private="false" />
+		<Reference Include="UnityEngine.ImageConversionModule" HintPath="$(GameManagedDir)\UnityEngine.ImageConversionModule.dll" Private="false" />
+		<Reference Include="UnityEngine.IMGUIModule" HintPath="$(GameManagedDir)\UnityEngine.IMGUIModule.dll" Private="false" />
+		<Reference Include="UnityEngine.Physics2DModule" HintPath="$(GameManagedDir)\UnityEngine.Physics2DModule.dll" Private="false" />
+		<Reference Include="UnityEngine.TextRenderingModule" HintPath="$(GameManagedDir)\UnityEngine.TextRenderingModule.dll" Private="false" />
+		<Reference Include="UnityEngine.UIModule" HintPath="$(GameManagedDir)\UnityEngine.UIModule.dll" Private="false" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- 插件运行时按“DLL 同级目录/Data”读取角色、特性和图标，必须随构建输出。 -->
+		<Content Include="Data\**\*" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<!-- 共享 InstallRatopiaMod 目标只拷贝 DLL；特殊鼠鼠的 Data 目录随构建一起安装。 -->
+	<Target Name="InstallSpecialRatizensData"
+	        AfterTargets="InstallRatopiaMod"
+	        Condition="'$(Configuration)' == 'Release' and '$(DisableRatopiaModInstall)' != 'true'">
+		<MakeDir Directories="$(RatopiaPluginInstallDir)\Data\Icon" />
+		<ItemGroup>
+			<SpecialRatizensDataFiles Include="Data\**\*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(SpecialRatizensDataFiles)"
+		      DestinationFiles="@(SpecialRatizensDataFiles->'$(RatopiaPluginInstallDir)\Data\%(RecursiveDir)%(Filename)%(Extension)')"
+		      SkipUnchangedFiles="true" />
+	</Target>
+</Project>

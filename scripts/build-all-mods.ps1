@@ -124,13 +124,20 @@ foreach ($project in $projects) {
     }
 
     $outputDir = $pluginDll.DirectoryName
-    $filesToPackage = Get-ChildItem -LiteralPath $outputDir -File |
-        Where-Object { $_.Extension -notin @('.pdb', '.xml') }
+    # 递归收集构建输出（含 Data/ 等内容子目录），排除 pdb/xml 与 .NET SDK 的 ref 引用程序集目录
+    $filesToPackage = Get-ChildItem -LiteralPath $outputDir -Recurse -File |
+        Where-Object {
+            $_.Extension -notin @('.pdb', '.xml') -and
+            $_.FullName -notmatch '[\\/]ref[\\/]'
+        }
 
     $pluginDir = Join-Path $collectionRoot "BepInEx/plugins/$assemblyName"
     New-Item -ItemType Directory -Force $pluginDir | Out-Null
     foreach ($file in $filesToPackage) {
-        Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $pluginDir $file.Name) -Force
+        $relativePath = $file.FullName.Substring($outputDir.Length).TrimStart('\', '/')
+        $destination = Join-Path $pluginDir $relativePath
+        New-Item -ItemType Directory -Force (Split-Path -Parent $destination) | Out-Null
+        Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
     }
 
     $singlePackageRoot = Join-Path $OutputDirectory "single-package/$assemblyName"
@@ -140,7 +147,10 @@ foreach ($project in $projects) {
     $singlePluginDir = Join-Path $singlePackageRoot "BepInEx/plugins/$assemblyName"
     New-Item -ItemType Directory -Force $singlePluginDir | Out-Null
     foreach ($file in $filesToPackage) {
-        Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $singlePluginDir $file.Name) -Force
+        $relativePath = $file.FullName.Substring($outputDir.Length).TrimStart('\', '/')
+        $destination = Join-Path $singlePluginDir $relativePath
+        New-Item -ItemType Directory -Force (Split-Path -Parent $destination) | Out-Null
+        Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
     }
 
     $assetName = "$assemblyName-v$version.zip"

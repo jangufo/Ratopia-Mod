@@ -3,4 +3,5 @@
     <File Path=".editorconfig" />
   </Folder>
   <Project Path="RatopiaMod.YunQing.All/RatopiaMod.YunQing.All.csproj" />
+  <Project Path="SpecialRatizens/SpecialRatizens.csproj" Id="5ede2ac1-54ce-4274-9748-a9b9822e12cb" />
 </Solution>

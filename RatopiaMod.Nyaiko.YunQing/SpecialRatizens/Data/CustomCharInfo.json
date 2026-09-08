@@ -1,0 +1,194 @@
+[
+  {
+    "Category": 0,
+    "Name": "NaiNai_Wisdom",
+    "T_Name": "奈奈的智慧",
+    "EffectValue_A": 1.0,
+    "EffectValue_B": 0.0,
+    "Description": "奈奈酱充满了智慧 <sprite name=FS_Exp> 经验获取 <color=#1E8A00>+100%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "NaiNai_Benevolence",
+    "T_Name": "奈奈的关爱",
+    "EffectValue_A": 2.0,
+    "EffectValue_B": 0.0,
+    "Description": "每一只鼠鼠都十分喜欢奈奈酱 <sprite name=FS_Happiness> 市民的幸福度 <color=#1E8A00>+ 三维/2</color>"
+  },
+  {
+    "Category": 0,
+    "Name": "LB_Sad",
+    "T_Name": "联邦的哀伤",
+    "EffectValue_A": -50.0,
+    "EffectValue_B": 0.0,
+    "Description": "吃饭现在对嘤联邦来说是一件痛苦的事情 <sprite name=FS_Happiness> 幸福度 <color=#C83232>-50</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "LB_Hope",
+    "T_Name": "联邦的希望",
+    "EffectValue_A": 1.0,
+    "EffectValue_B": 3.0,
+    "Description": "修习了神秘的炼金术，每次吃饭会产出 <color=#1E8A00>(三维/3)~(三维/2)</color>金矿石，<sprite name=FS_HungerTime> 食物消耗速度 <color=#C83232>+100%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "SY_KCL",
+    "T_Name": "垦草令",
+    "EffectValue_A": 10.0,
+    "EffectValue_B": 30.0,
+    "Description": "城市每贮存10倍人口食物时 <sprite name=FS_Happiness> 市民的幸福度 <color=#1E8A00>+1</color> (至多+30)"
+  },
+  {
+    "Category": 1,
+    "Name": "SY_QL",
+    "T_Name": "秦律",
+    "EffectValue_A": 2.0,
+    "EffectValue_B": 0.0,
+    "Description": "可颁布的法典数量增加 <color=#1E8A00>[智力-初始智力+当前城市等级/2]</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "YF_YJQ",
+    "T_Name": "岳家枪",
+    "EffectValue_A": 100.0,
+    "EffectValue_B": 0.0,
+    "Description": "装备长枪时，攻击可造成0.5倍范围伤害并恢复 <color=#1E8A00>伤害*手艺/100</color> 生命值"
+  },
+  {
+    "Category": 1,
+    "Name": "YF_YJJ",
+    "T_Name": "岳家军",
+    "EffectValue_A": 0.0,
+    "EffectValue_B": 0.0,
+    "Description": "所有士兵攻击力 <color=#1E8A00>+5</color>、防御力 <color=#1E8A00>+3</color>、移动速度 <color=#1E8A00>+30%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "HT_SYZS",
+    "T_Name": "神医在世",
+    "EffectValue_A": 0.0,
+    "EffectValue_B": 0.0,
+    "Description": "所有市民在非受伤状态下受到致命伤害时，<color=#1E8A00>不会直接死亡</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "HT_WQX",
+    "T_Name": "五禽戏",
+    "EffectValue_A": 0.0,
+    "EffectValue_B": 0.0,
+    "Description": "所有市民 <sprite name=FS_Health> 最大生命 <color=#1E8A00>+50</color>、<sprite name=FS_Productivity> 工作效率 <color=#1E8A00>+20%</color>、<sprite name=FS_Speed> 移动速度 <color=#1E8A00>+10%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "WH_NC",
+    "T_Name": "牛车",
+    "EffectValue_A": 10.0,
+    "EffectValue_B": 4.0,
+    "Description": "与他国贸易的距离缩短 <color=#1E8A00>[10 + (手艺-初始手艺)*4]%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "WH_SZ",
+    "T_Name": "商祖",
+    "EffectValue_A": 2.0,
+    "EffectValue_B": 0.0,
+    "Description": "与他国贸易的协议数量增加 <color=#1E8A00>[智力-初始智力+当前城市等级/2]</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "BG_NYQY",
+    "T_Name": "能以取予",
+    "EffectValue_A": 10.0,
+    "EffectValue_B": 0.0,
+    "Description": "物品出口价格降低 <color=#C83232>[(1-(智力-10)/(智力-9))*100]%</color>，与他国贸易 <color=#1E8A00>快速增加他国繁荣值</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "BG_SS",
+    "T_Name": "商圣",
+    "EffectValue_A": 2.0,
+    "EffectValue_B": 0.0,
+    "Description": "食物贸易价格<color=#C83232>秋降</color><color=#1E8A00>冬涨</color>[智力*2]%，日用品贸易价格<color=#C83232>春降</color><color=#1E8A00>夏涨</color>[智力*2]%"
+  },
+  {
+    "Category": 1,
+    "Name": "LLJ_KYSS",
+    "T_Name": "开元盛世",
+    "EffectValue_A": 2.0,
+    "EffectValue_B": 0.0,
+    "Description": "所有非单人服务业可同时服务的人数增加 <color=#1E8A00>[智力-初始智力+当前城市等级/2]</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "LLJ_LY",
+    "T_Name": "梨园",
+    "EffectValue_A": 10.0,
+    "EffectValue_B": 1.5,
+    "Description": "所有市民的娱乐需求提高 <color=#C83232>[(1-(智力-10)/(智力-9))*100]%</color>，工作效率提升 <color=#1E8A00>[智力*1.5]%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "DZ_MGJZ",
+    "T_Name": "蘑菇教主",
+    "EffectValue_A": 10.0,
+    "EffectValue_B": 5.0,
+    "Description": "蘑菇农场的生产速度增加 <color=#1E8A00>[10 + (智力-初始智力)*5]%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "DZ_MGZL",
+    "T_Name": "蘑菇之力",
+    "EffectValue_A": 0.0,
+    "EffectValue_B": 0.0,
+    "Description": "所有市民食用含有蘑菇的食物后，<sprite name=FS_FatigueTime> 体力消耗减少 <color=#1E8A00>+30%</color>、<sprite name=FS_Productivity> 工作效率 <color=#1E8A00>+10%</color>、<sprite name=FS_Speed> 移动速度 <color=#1E8A00>+10%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "ZY_QTSPQ",
+    "T_Name": "七探蛇盘枪",
+    "EffectValue_A": 1.5,
+    "EffectValue_B": 0.0,
+    "Description": "装备长枪时，攻击可造成0.5倍范围伤害并击退敌方"
+  },
+  {
+    "Category": 1,
+    "Name": "ZY_LD",
+    "T_Name": "龙胆",
+    "EffectValue_A": 0.3,
+    "EffectValue_B": 50.0,
+    "Description": "自身移动速度 <color=#1E8A00>+30%</color>、闪避 <color=#1E8A00>+50%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "PKQ_SWFT",
+    "T_Name": "十万伏特",
+    "EffectValue_A": 2.0,
+    "EffectValue_B": 15.0,
+    "Description": "在发电站工作时，<color=#1E8A00>[(力量+智力)*2]%</color> 概率额外增加 <color=#1E8A00>[力量*(智力/2~智力*2)]</color> 电力，<color=#C83232>[15-智力]%</color> 概率损坏建筑"
+  },
+  {
+    "Category": 1,
+    "Name": "PKQ_DQCD",
+    "T_Name": "电气场地",
+    "EffectValue_A": 1.0,
+    "EffectValue_B": 10.0,
+    "Description": "工作时溢出的电力将恢复皮卡丘的体力，并使所有市民移动速度 <color=#1E8A00>+[敏捷]%</color>"
+  },
+  {
+    "Category": 1,
+    "Name": "AMJ7_LZDW",
+    "T_Name": "量子电网",
+    "EffectValue_A": 3.0,
+    "EffectValue_B": 0.0,
+    "Description": "将自身与所有电网及电力建筑连接，并使所有电力使用效率 <color=#1E8A00>+[三维/3]% </color>"
+  },
+  {
+    "Category": 1,
+    "Name": "AMJ7_LZJX",
+    "T_Name": "量子机械",
+    "EffectValue_A": 50.0,
+    "EffectValue_B": 3.0,
+    "Description": "奥米伽-7无法死亡，与所有机械单位连接共享电力，并使其获得 <color=#1E8A00>[50+三维/3]%</color> 自身三维"
+  }
+]
