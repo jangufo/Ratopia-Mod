@@ -167,3 +167,8 @@
   - `Generation.NewCitizenGenderLimit`（-1 不限制 / 0 男 / 1 女）。
   整合版遗留但独立版未安装补丁的 29 个设置开关收进 `CustomMOD.LegacySettings`（静态默认值，仅供遗留代码路径读取，不再序列化为任何文件）。
 - **路径标准化**：`Core/PluginDataPaths` 改用 BepInEx `Paths.PluginPath` + `System.IO.Path.Combine`（`BepInEx/plugins/SpecialRatizens/Data`）；`CustomMOD.CustomDataPath` 不再保存尾部分隔符，全部路径拼接走 `Path.Combine`。
+- **CSV 彻底清退**（第二步重构补遗）：
+  - **敌方死亡掉落功能整体移除**（`CustomEnemyDrop` / `EnemyDropDatas` / `LoadEnemyDropDatas` / `GameEnemy_DeathCheck` / `EliteEnemy_DeathCheck`）：这是整合版的遗留功能——通过 `CustomEnemyDrop.csv`（列：Name=敌人类型、T_Name=显示名、DropList=掉落物列表）为每种敌人配置自定义死亡掉落，开关 `EnemyDeadthDrop` 开启后在敌人死亡位置按概率生成物品。独立版从未安装对应的死亡补丁、开关默认关闭、且 Data 目录里从来没有这个 CSV，属于彻底死代码。
+  - **游戏数据库 CSV 导出脚手架移除**（`OutPutCSVDatas` 及 `OutPutGameDatas` 中 40 处调用）：整合版开发期把原版游戏 40 张数据库表导出为 CSV 的调试工具，与特殊鼠鼠功能无关；`OutPutGameDatas` 保留 JSON 导出（SkinBunlde）。
+  - **BaseCommand 精简**（714 → 约 280 行）：删除 `LoadCsvData` 全家族（泛型/字典/反射映射/文本解析）、两个 `SaveCsvData`、`ReplaceCsvText`、`ObjectToCsvText`、`CsvTextToObject`、`SaveFileData` 及仅被 CSV 链使用的 `ObjectToJson`/`JsonToObject`；保留仍被皮肤存档与 JSON 导出使用的 `SaveObjectToJson`/`LoadObjectByJson`/`SaveFile`，并修正 `LoadObjectByJson` 上误标的「CSV文本转类」注释。`Legacy/CsvData.cs`、`Legacy/CustomEnemyDrop.cs` 两个文件删除。
+  - 至此**所有 .cs 文件零 CSV 引用**，数据面仅存 JSON（`Data/*.json`）与 PNG（`Data/Icon/`）。

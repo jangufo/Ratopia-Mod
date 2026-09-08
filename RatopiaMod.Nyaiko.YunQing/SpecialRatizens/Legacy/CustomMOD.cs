@@ -317,7 +317,6 @@ namespace RatopiaMod
             public static bool TradeResultMessage = false;
             public static bool UtopiaMode = false;
             public static bool SafeMode = false;
-            public static bool EnemyDeadthDrop = false;
             public static bool PoPUnLimit = false;
             public static bool OptimizeAI = false;
             public static bool OptimizeBuyAndSellPathFind = false;
@@ -528,10 +527,6 @@ namespace RatopiaMod
         /// 和平模式
         /// </summary>
         static bool ActiveSafeMode { get { return LegacySettings.SafeMode; } set { LegacySettings.SafeMode = value; } }
-        /// <summary>
-        /// 启用敌方死亡掉落
-        /// </summary>
-        static bool ActiveEnemyDeadthDrop { get { return LegacySettings.EnemyDeadthDrop; } set { LegacySettings.EnemyDeadthDrop = value; } }
         /// <summary>
         /// 启用更多种植
         /// </summary>
@@ -1046,8 +1041,6 @@ namespace RatopiaMod
 
             }
 
-
-
             if (GUILayout.Button($"游戏速度加快：{GetButtonValue(ActiveAddTimeScale)}"))
             {
                 ActiveAddTimeScale = !ActiveAddTimeScale;
@@ -1136,7 +1129,6 @@ namespace RatopiaMod
             {
                 ActiveSheetMoreInfo = !ActiveSheetMoreInfo;
 
-
             }
 
             if (GUILayout.Button($"友方掉落无伤：{GetButtonValue(ActiveDropNoDamgeWithOurTeam)}"))
@@ -1186,12 +1178,6 @@ namespace RatopiaMod
             if (GUILayout.Button($"和平模式：{GetButtonValue(ActiveSafeMode)}"))
             {
                 ActiveSafeMode = !ActiveSafeMode;
-
-            }
-
-            if (GUILayout.Button($"敌方死亡掉落：{GetButtonValue(ActiveEnemyDeadthDrop)}"))
-            {
-                ActiveEnemyDeadthDrop = !ActiveEnemyDeadthDrop;
 
             }
 
@@ -1759,7 +1745,6 @@ namespace RatopiaMod
 
             specialUnit = null;
 
-
             foreach (CustomCharInfo info in CustomCharInfo.Values)
                 info.ClearUser();
 
@@ -1838,10 +1823,6 @@ namespace RatopiaMod
         /// 物品原始价格数据
         /// </summary>
         static Dictionary<TileType, int> TileOriginePriceDatas = new Dictionary<TileType, int>();
-        /// <summary>
-        /// 敌人掉落数据
-        /// </summary>
-        static Dictionary<EnemyType, CustomEnemyDrop> EnemyDropDatas = new Dictionary<EnemyType, CustomEnemyDrop>();
 
         /// <summary>
         /// 数据初始化
@@ -1851,8 +1832,6 @@ namespace RatopiaMod
         {
             OutPutGameDatas();
 
-            LoadEnemyDropDatas();
-
             LoadGoodCharDB();
 
             LoadProsperityDB(__instance);
@@ -1860,7 +1839,6 @@ namespace RatopiaMod
             LoadStorageDB();
 
             LoadTileOriginePriceDatas();
-
 
             if (ActiveMorePlantingPlants)
                 SetMorePlantingDB(true);
@@ -1948,34 +1926,6 @@ namespace RatopiaMod
             foreach (KeyValuePair<string, List<string>> keyValuePair in CitizenCustomCategorySkins)
             {
                 Debug.LogWarning($"当前部位 {keyValuePair.Key} 共有 {keyValuePair.Value.Count} 皮肤");
-            }
-        }
-
-        /// <summary>
-        /// 加载敌人掉落数据
-        /// </summary>
-        static void LoadEnemyDropDatas()
-        {
-            //CustomEnemyDrop eDrop = new CustomEnemyDrop();
-
-            //TileDrop drop = new TileDrop();
-
-            //drop.name = TileType.Bone;
-
-            //eDrop.dropList.Add(drop);
-
-            //eDrop.dropList.Add(drop);
-
-            //Debug.Log($"存储掉落 {BaseCommand.SaveCsvData($"{CustomDataPath}CustomEnemyDropDatas.csv", new List<CustomEnemyDrop>() { eDrop }, new List<List<string>>() { new List<string>() { "Name", "T_Name", "DropList" } })}");
-
-            if (!BaseCommand.LoadCsvData(Path.Combine(CustomDataPath, "CustomEnemyDrop.csv"), out List<CustomEnemyDrop> list))
-                list = new List<CustomEnemyDrop>();
-
-            EnemyDropDatas.Clear();
-
-            foreach (CustomEnemyDrop drop1 in list)
-            {
-                EnemyDropDatas.Add(drop1.name, drop1);
             }
         }
 
@@ -2112,127 +2062,11 @@ namespace RatopiaMod
             if (!force && !OutPutDatas)
                 return;
 
-            //物品
-            OutPutCSVDatas("Dic_TileDB", DBMgr.Dic_TileDB.Values.ToList());
-            //建筑
-            OutPutCSVDatas("Dic_BuildDB", DBMgr.Dic_BuildDB.Values.ToList());
-            //锁定的建筑
-            OutPutCSVDatas("Dic_BlockBuildDB", DBMgr.Dic_BlockBuildDB.Values.ToList());
-            //铁路
-            OutPutCSVDatas("Dic_RailDB", DBMgr.Dic_RailDB.Values.ToList());
-            //升降轨道
-            OutPutCSVDatas("Dic_LiftRailDB", DBMgr.Dic_LiftRailDB.Values.ToList());
-            //植物
-            OutPutCSVDatas("List_PlantDB", DBMgr.List_PlantDB);
-            //敌人
-            OutPutCSVDatas("List_EnemyDB", DBMgr.m_EnemyDB._list);
-            //动物
-            OutPutCSVDatas("List_AnimalDB", DBMgr.m_AnimalDB._list);
-            //地图物品
-            OutPutCSVDatas("List_MapObjDB", DBMgr.m_MapObjectDB._list);
-            //国家
-            //OutPutCSVDatas("List_CountryDB", DBMgr.List_CountryDB);
-            //随机事件
-            OutPutCSVDatas("List_RandEventDB", DBMgr.List_RandEventDB);
-            //繁荣
-            OutPutCSVDatas("List_ProsperityDB", DBMgr.List_ProsperityDB);
-            //军事建筑
-            OutPutCSVDatas("List_MilitaryDB", DBMgr.m_MilitaryDB._list);
-            //物品
-            OutPutCSVDatas("List_ItemDB", DBMgr.List_ItemDB);
-            //武器
-            OutPutCSVDatas("List_WeaponDB", DBMgr.List_WeaponDB);
-            //衣服（防具）
-            OutPutCSVDatas("List_ClothesDB", DBMgr.List_ClothesDB);
-            //配件
-            OutPutCSVDatas("List_AccessoryDB", DBMgr.List_AccessoryDB);
-            //女王角色
-            OutPutCSVDatas("List_QueenCharacterDB", DBMgr.List_QueenCharacterDB);
-            //食物类型
-            OutPutCSVDatas("List_FoodType", DBMgr.List_FoodType);
-            //生活用品类型
-            OutPutCSVDatas("List_LifeType", DBMgr.List_LifeType);
-            //技能
-            OutPutCSVDatas("List_Tech_DB", DBMgr.List_Tech_DB);
-            //特征1
-            OutPutCSVDatas("List_Char1_DB", DBMgr.m_CharacterDB.List_Char1_DB);
-            //特征2
-            OutPutCSVDatas("List_Char2_DB", DBMgr.m_CharacterDB.List_Char2_DB);
-            //机器鼠特征1
-            OutPutCSVDatas("List_RatronChar1_DB", DBMgr.List_RatronChar1_DB);
-            //机器鼠特征2
-            OutPutCSVDatas("List_RatronChar1_DB", DBMgr.List_RatronChar2_DB);
-            //
-            OutPutCSVDatas("List_RatronDB", DBMgr.List_RatronDB);
-            //机器鼠类型
-            OutPutCSVDatas("List_HeadDB", DBMgr.List_HeadDB);
-            //能力
-            OutPutCSVDatas("List_Ability_DB", DBMgr.m_AbilityDB._list);
-            //
-            OutPutCSVDatas("List_BodyDB", DBMgr.List_BodyDB);
-            //黑暗等级
-            OutPutCSVDatas("List_DarkLevelNode", DBMgr.List_DarkLevelNode);
-            //光明等级
-            OutPutCSVDatas("List_PartsDB", DBMgr.List_SunLevelNode);
-            //
-            OutPutCSVDatas("List_EarthratDB", DBMgr.List_EarthratDB);
-            //
-            OutPutCSVDatas("List_PartsDB", DBMgr.List_PartsDB);
-            //
-            OutPutCSVDatas("List_Wave_DB", DBMgr.List_Wave_DB);
-            //
-            OutPutCSVDatas("List_ScientistTech_DB", DBMgr.List_ScientistTech_DB);
-            //
-            OutPutCSVDatas("List_MagicianTech_DB", DBMgr.List_MagicianTech_DB);
-            //
-            OutPutCSVDatas("List_DmBlock_Bd", DBMgr.List_DmBlock_Bd);
-
-            LocalizationManager.InitializeIfNeeded();
-            //能力
-            OutPutCSVDatas("LanguageData", LocalizationManager.Sources[0].mLanguages);
-
             //皮肤配置
             OutPutJsonData("SkinBunlde", SpineDresserMgr.Instance.Bundle);
 
             Debug.LogWarning("皮肤文件已导出");
 
-            #region 手动分析数据
-
-            //string value = "下标,名称,中文名称,等级,出口,进口\n";
-
-            //foreach (CountryInfo countryInfo in DBMgr.list_)
-            //{
-            //    value += $"{countryInfo.Index},{countryInfo.Name},{countryInfo.T_Name},{countryInfo.ProsLevel},{GetDicContent(countryInfo.Dic_Export)},{GetDicContent(countryInfo.Dic_Import)}\n";
-            //}
-
-            //BaseCommand.SaveFile($"{DataPath}城市数据.csv", DataPath, value);
-
-            //BaseCommand.SaveCsvData($"{DataPath}默认时间表.csv", DataPath, SystemMgr.m_WorkTable_Basic.ToList());
-
-            #endregion
-
-        }
-
-        /// <summary>
-        /// 获得字典内容
-        /// </summary>
-        /// <param name="dic"></param>
-        /// <returns></returns>
-        static string GetDicContent(Dictionary<int, List<TileType>> dic)
-        {
-            string text = "", keyText = "";
-
-            foreach (KeyValuePair<int, List<TileType>> keyValue in dic)
-            {
-                if (!text.Equals(""))
-                    text += "    ";
-
-                keyText = $"[繁荣{keyValue.Key}]";
-
-                text += $"{keyText}{string.Join($"    {keyText}", keyValue.Value.Select(t => DBMgr.Dic_TileDB[t].T_Name).ToArray())}";
-            }
-
-            return $"\"{text}\"";
         }
 
         /// <summary>
@@ -2245,19 +2079,6 @@ namespace RatopiaMod
             string result = BaseCommand.SaveObjectToJson($"{DataPath}{fileName}.json", data) ? "成功" : "失败";
 
             Debug.Log($"{fileName}导出{result}");
-        }
-
-        /// <summary>
-        /// 导出CSV数据
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="index"></param>
-        /// <param name="list"></param>
-        static void OutPutCSVDatas<T>(string fileName, List<T> list)
-        {
-            string result = BaseCommand.SaveCsvData($"{DataPath}{fileName}.csv", DataPath, list) ? "成功" : "失败";
-
-            Debug.Log($"{fileName}导出{result}，共 {list.Count} 数据");
         }
 
         /// <summary>
@@ -5466,69 +5287,6 @@ namespace RatopiaMod
 
         #endregion
 
-        #region 敌方死亡掉落
-
-        /// <summary>
-        /// 敌方死亡检测
-        /// </summary>
-        /// <param name="__instance"></param>
-        public static void GameEnemy_DeathCheck(GameEnemy __instance)
-        {
-            if (!ActiveEnemyDeadthDrop)
-                return;
-
-            RunEnemyDrop(__instance);
-        }
-
-        /// <summary>
-        /// 精英敌方死亡
-        /// </summary>
-        /// <param name="__instance"></param>
-        public static void EliteEnemy_DeathCheck(EliteEnemy __instance)
-        {
-            if (!ActiveEnemyDeadthDrop)
-                return;
-
-            RunEnemyDrop(__instance);
-        }
-
-        /// <summary>
-        /// 执行敌方掉落
-        /// </summary>
-        /// <param name="enemy"></param>
-        static void RunEnemyDrop(GameEnemy enemy)
-        {
-            if (!TryGetEnemyDropData(enemy.m_EnemyInfo.m_EnemyName, out CustomEnemyDrop enemyDrop) || enemyDrop.dropList.Count == 0)
-                return;
-
-            Vector3 pos = enemy.GetPos();
-
-            int count = 0;
-
-            foreach (TileDrop drop in enemyDrop.dropList)
-            {
-                while (count < drop.count && IntProbability <= drop.proValue)
-                {
-                    count++;
-                }
-
-                CreateTileObj(drop.name, pos, count);
-            }
-        }
-
-        /// <summary>
-        /// 尝试获取敌方掉落
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="drop"></param>
-        /// <returns></returns>
-        static bool TryGetEnemyDropData(EnemyType name, out CustomEnemyDrop drop)
-        {
-            return EnemyDropDatas.TryGetValue(name, out drop);
-        }
-
-        #endregion
-
         #region 无限人口
 
         /// <summary>
@@ -7511,7 +7269,6 @@ namespace RatopiaMod
             //    FindPathByMono(startPos, endPos, unit.GetMiniInfo(), null);
             //}
             //PathFindMgr.CanIpathFind2(endPos, startPos, unit.GetMiniInfo(), null);
-
 
             //Debug.LogError($"起点 {startPos} 终点 {endPos} 未获得路径 {TileMgr.CanI_StandBlock(endPos, 1)}");
 

@@ -5,7 +5,6 @@ namespace SpecialRatizens.Configuration
 {
     /// <summary>
     /// BepInEx 配置项绑定。独立版只暴露当前已安装补丁真正读取的设置，
-    /// 整合版遗留但未安装补丁的功能开关不再对外暴露。
     /// </summary>
     internal sealed class ModConfig
     {
@@ -28,13 +27,13 @@ namespace SpecialRatizens.Configuration
 
         public static ModConfig Instance { get; private set; }
 
-        /// <summary>启用特殊鼠鼠（原 CustomSettings.CustomSpecialUnit）。</summary>
+        /// <summary>启用特殊鼠鼠</summary>
         public ConfigEntry<bool> Enabled { get; }
 
-        /// <summary>移民候选全正面特性（原 CustomSettings.OnlyGoodCharacteristic）。</summary>
+        /// <summary>移民候选全正面特性</summary>
         public ConfigEntry<bool> OnlyGoodCharacteristic { get; }
 
-        /// <summary>移民性别限制（原 CustomSettings.NewCitizenGenderLimit）。</summary>
+        /// <summary>移民性别限制</summary>
         public ConfigEntry<int> NewCitizenGenderLimit { get; }
     }
 }

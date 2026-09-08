@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace RatopiaMod
@@ -72,11 +72,12 @@ namespace RatopiaMod
 
             if (bytes != null)
             {
-                Texture2D tex = new Texture2D(2048, 2048, TextureFormat.RGBA32, false);
+                var tex = new Texture2D(2048, 2048, TextureFormat.RGBA32, false)
+                {
+                    wrapMode = TexWrapMode,
 
-                tex.wrapMode = TexWrapMode;
-
-                tex.filterMode = FilMode;
+                    filterMode = FilMode
+                };
 
                 tex.LoadImage(bytes, false);
 
@@ -213,10 +214,11 @@ namespace RatopiaMod
         }
 
         /// <summary>
-        /// CSV文本转类
+        /// JSON文件转类
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="text"></param>
+        /// <param name="path"></param>
+        /// <param name="result"></param>
         /// <returns></returns>
         public static bool LoadObjectByJson<T>(string path, out T result)
         {
@@ -225,7 +227,7 @@ namespace RatopiaMod
             try
             {
                 string text = File.ReadAllText(path, Encoding.UTF8);
-                
+
                 result = JsonConvert.DeserializeObject<T>(text);
 
                 return true;
@@ -236,305 +238,6 @@ namespace RatopiaMod
 
                 return false;
             }
-        }
-
-        /// <summary>
-        /// 加载csv数据
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="path"></param>
-        /// <param name="list"></param>
-        /// <param name="fieldLine"></param>
-        /// <param name="idFormat"></param>
-        /// <returns></returns>
-        public static bool LoadCsvData<T>(string path, out List<T> list, int fieldLine = 0, string idFormat = "")
-        {
-            List<List<string>> heads = new List<List<string>>();
-
-            LoadCsvData(typeof(T), path, fieldLine, ref heads, idFormat, out _, out List<object> result);
-
-            //Debug.Log(result.Count);
-
-            list = result != null ? result.Select(t => (T)t).ToList() : null;
-
-            if (list == null)
-                Debug.Log($"{typeof(T)} {path} 读取失败");
-
-            return list != null;
-        }
-
-        /// <summary>
-        /// 加载CSV数据为字典
-        /// </summary>
-        /// <param name="dataType"></param>
-        /// <param name="path"></param>
-        /// <param name="fieldLine"></param>
-        /// <param name="heads"></param>
-        /// <param name="idFormat"></param>
-        /// <returns></returns>
-        public static Dictionary<string, object> LoadCsvDataToDic(Type dataType, string path, int fieldLine, ref List<List<string>> heads, string idFormat)
-        {
-            LoadCsvData(dataType, path, fieldLine, ref heads, idFormat, out Dictionary<string, object> results, out _);
-
-            return results;
-        }
-
-        /// <summary>
-        /// 加载CSV数据
-        /// </summary>
-        /// <param name="dataType"></param>
-        /// <param name="path"></param>
-        /// <param name="fieldLine"></param>
-        /// <param name="heads"></param>
-        /// <param name="idFormat"></param>
-        /// <param name="returnDic"></param>
-        /// <returns></returns>
-        public static void LoadCsvData(Type dataType, string path, int fieldLine, ref List<List<string>> heads, string idFormat, out Dictionary<string, object> results, out List<object> list)
-        {
-            CsvData data = LoadCsvData(path);
-
-            results = new Dictionary<string, object>();
-
-            list = new List<object>();
-
-            object result = Activator.CreateInstance(dataType);
-
-            FieldInfo fieldInfo;
-
-            PropertyInfo proInfo = null;
-
-            Type type;
-
-            //Debug.Log(data.data[0].Count + " / " + data.data[1].Count);
-
-            //Debug.Log($"{path} {result.GetType()} {data.data[0].Count}/{data.data[1].Count} {fieldLine}/{data.DataCount} {data.data.Count}");
-
-            //try
-            //{
-            //变量名
-            string fieldName, firstFieldValue;
-
-            object value;
-
-            heads = new List<List<string>>();
-
-            int intID;
-
-            object id;
-
-            for (int r = 0; r < data.data.Count; r++)
-            {
-                if (r < fieldLine + 1)
-                {
-                    heads.Add(data.data[r]);
-
-                    //Debug.Log(string.Join(",", data.data[r]));
-
-                    continue;
-                }
-
-                firstFieldValue = data.data[r][0].Trim();
-
-                //列头为空时跳过整行数据（通常列头为ID）
-                if (firstFieldValue.Equals(""))
-                    continue;
-
-                id = firstFieldValue;
-
-                result = Activator.CreateInstance(dataType);
-
-                for (int c = 0; c < data.data[r].Count; c++)
-                {
-                    //列值为空时跳过此列数据（即使用默认数据）
-                    if (data.data[r][c].Trim().Equals(""))
-                    {
-                        //Debug.Log("跳过 " + r + " - " + c + " / " + data.data[r][c] + " / " + data.data[r].Count);
-
-                        continue;
-                    }
-
-                    //Debug.Log($"{r} - {c}: {data.data[r][c]}");
-
-                    fieldName = data.data[fieldLine][c];
-
-                    //最后一列疑似因File.ReadAllText读出换行符，所以进行Trim处理
-                    fieldInfo = result.GetType().GetField(fieldName.Trim(), Flags);
-
-                    //Debug.Log(fieldName + " / " + fieldName.Trim() + " / " + fieldInfo);
-
-                    if (fieldInfo == null)
-                    {
-                        proInfo = result.GetType().GetProperty(fieldName.Trim(), Flags);
-
-                        if (proInfo == null)
-                        {
-                            Debug.Log(result.GetType().ToString() + " 获得字段 " + fieldName + " 失败！");
-
-                            continue;
-                        }
-
-                        type = proInfo.PropertyType;
-                    }
-                    else
-                        type = fieldInfo.FieldType;
-
-                    //Debug.Log($"当前值 {data.data[r][c]}，目标类型 {type}");
-
-                    try
-                    {
-                        //只有字符串类型可以写为"1.0f"，浮点只能转换"1.0"，否则转换失败
-                        value = Convert.ChangeType(data.data[r][c], type);
-                    }
-                    catch
-                    {
-                        value = JsonConvert.DeserializeObject(data.data[r][c], type);
-
-                        //Debug.Log($"{data.data[r][c]} 进行Json格式化");
-                    }
-
-                    if (value != null)
-                    {
-                        //列头视为ID
-                        if (c == 0 && !idFormat.Equals(""))
-                        {
-                            //如果是数字类型，则进行格式化
-                            if (int.TryParse(firstFieldValue, out intID))
-                                id = intID.ToString(idFormat);
-
-                            value = id;
-                        }
-
-                        if (fieldInfo != null)
-                            fieldInfo.SetValue(result, value);
-                        else if (proInfo != null)
-                            proInfo.SetValue(result, value);
-                    }
-                }
-
-                list.Add(result);
-
-                if (!results.ContainsKey(id.ToString()))
-                    results.Add(id.ToString(), result);
-            }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Debug.LogWarning(path + " (" + result.GetType().ToString() + "): " + ex);
-            //}
-
-            //Debug.Log(results.Count + " / " + list.Count + " / " + data.data.Count);
-        }
-
-        /// <summary>
-        /// 读取CSV数据
-        /// </summary>
-        /// <param name="path">路径</param>
-        /// <returns></returns>
-        public static CsvData LoadCsvData(string path)
-        {
-            CsvData data = new CsvData();
-
-            string str;
-
-            //读取外部资源数据
-            try
-            {
-                if (File.Exists(path))
-                    str = File.ReadAllText(path, Encoding.UTF8);
-                else
-                    str = Resources.Load(path.Substring(0, path.IndexOf("."))).ToString();
-
-                data.LoadData(str);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning(ex);
-            }
-
-            return data;
-        }
-
-        public static bool SaveCsvData<T>(string path, string folderPath, List<T> list)
-        {
-            try
-            {
-                string str = "", objStr = "";
-
-                foreach (FieldInfo field in typeof(T).GetFields())
-                {
-                    str += $"{field.Name},";
-                }
-
-                str += "\n";
-
-                object tempObj = null;
-
-                Type type = typeof(T);
-
-                foreach (T obj in list)
-                {
-                    objStr = "";
-
-                    if (obj == null)
-                        continue;
-
-                    if (obj.GetType() != typeof(string))
-                    {
-                        foreach (FieldInfo field in typeof(T).GetFields())
-                        {
-                            if (field.GetType().Equals(type))
-                                continue;
-
-                            tempObj = type.GetField(field.Name).GetValue(obj);
-
-                            if (tempObj == null)
-                                objStr += "NULL";
-                            else if (!tempObj.GetType().IsPrimitive && tempObj.GetType() != typeof(string))
-                                objStr += $"{ReplaceCsvText(ObjectToJson(tempObj))},";
-                            else
-                                objStr += $"{ReplaceCsvText(tempObj.ToString())},";
-                        }
-                    }
-                    else
-                        objStr = obj.ToString();
-
-                    str += $"{objStr}\n";
-                }
-
-                SaveFile(path, folderPath, str);
-            }
-            catch (Exception ex)
-            {
-                Debug.Log($"{typeof(T)} {ex}");
-
-                return false;
-            }
-
-            return true;
-        }
-
-        public static string ObjectToJson(object obj)
-        {
-            if (obj == null)
-                return "";
-
-            return string.Format("\"{0}\"", JsonConvert.SerializeObject(obj).Replace("\"", "\"\""));
-        }
-
-        /// <summary>
-        /// Json转类
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        public static T JsonToObject<T>(string json)
-        {
-            return JsonConvert.DeserializeObject<T>(json);
-        }
-
-        public static string ReplaceCsvText(string str)
-        {
-            return str.Replace(',', '，').Replace("\n", "").Replace("\r", "");
         }
 
         public static bool SaveFile(string path, string folderPath, string content)
@@ -571,143 +274,6 @@ namespace RatopiaMod
             }
         }
 
-        /// <summary>
-        /// 保存CSV数据
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="objs"></param>
-        /// <param name="heads"></param>
-        public static bool SaveCsvData<T>(string path, List<T> objs, List<List<string>> heads)
-        {
-            if (heads == null || heads.Count == 0)
-                return false;
 
-            List<string> datas = new List<string>();
-
-            //添加表头
-            for (int i = 0; i < heads.Count; i++)
-            {
-                string str = string.Join(",", heads[i].ToArray());
-
-                datas.Add(str);
-            }
-
-            //获得字段名列表
-            List<string> fields = heads[heads.Count - 1];
-
-            T obj;
-
-            FieldInfo fieldInfo;
-
-            PropertyInfo proInfo;
-
-            List<string> data;
-
-            object value = null;
-
-            //迭代实体（行数据）
-            for (int i = 0; i < objs.Count; i++)
-            {
-                obj = objs[i];
-
-                data = new List<string>();
-
-                //反射字段值（列数据）
-                for (int c = 0; c < fields.Count; c++)
-                {
-                    fieldInfo = obj.GetType().GetField(fields[c].Trim(), Flags);
-
-                    if (fieldInfo == null)
-                    {
-                        proInfo = obj.GetType().GetProperty(fields[c].Trim(), Flags);
-
-                        if (proInfo != null)
-                            value = proInfo.GetValue(obj);
-                    }
-                    else
-                        value = fieldInfo.GetValue(obj);
-
-                    data.Add(value == null ? "" : value.ToString());
-                }
-
-                datas.Add(string.Join(",", data));
-
-                //Debug.Log(data.ToString());
-            }
-
-            return SaveFileData(path, datas);
-        }
-        
-        /// <summary>
-         /// 类转CSV文本
-         /// </summary>
-         /// <param name="obj"></param>
-         /// <returns></returns>
-        public static string ObjectToCsvText(object obj)
-        {
-            if (obj == null)
-                return "";
-
-            //单列数据前后添加双引号，数据中单个双引变两个双引
-            return string.Format("\"{0}\"", JsonConvert.SerializeObject(obj).Replace("\"", "\"\""));
-        }
-
-        /// <summary>
-        /// CSV文本转类
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        public static T CsvTextToObject<T>(string text)
-        {
-            if (text.Trim().Length == 0)
-                return default;
-
-            text = text.Replace("\"\"", "\"");
-
-            int leftIndex = text.IndexOf('[');
-
-            int rightIndex = text.LastIndexOf(']');
-
-            return JsonToObject<T>(text.Substring(leftIndex, rightIndex - leftIndex + 1));
-        }
-
-        /// <summary>
-        /// 保存文本数据
-        /// </summary>
-        /// <param name="strs"></param>
-        /// <param name="path"></param>
-        public static bool SaveFileData(string path, List<string> strs = null, string str = null)
-        {
-            try
-            {
-                if (!File.Exists(path))
-                {
-                    File.Create(path).Dispose();
-                }
-
-                //UTF-8方式保存
-                using (StreamWriter stream = new StreamWriter(path, false, Encoding.UTF8))
-                {
-                    if (strs != null)
-                    {
-                        for (int i = 0; i < strs.Count; i++)
-                        {
-                            if (strs[i] != null)
-                                stream.Write(strs[i] + "\n");
-                        }
-                    }
-                    else if (str != null)
-                        stream.Write(str);
-                }
-
-                return true;
-
-            }
-            catch
-            {
-                return false;
-            }
-        }
     }
 }
