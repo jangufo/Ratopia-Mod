@@ -165,17 +165,6 @@ namespace SpecialRatizens.Patching
             catch (Exception error) { return FailOpen("economy.agreement-count", error); }
         }
 
-        public static void DiplomaticTradeSheetDetailContentsUI_SetData(
-            DiplomaticTradeSheetDetailContentsUI __instance,
-            DiplomaticCountryData cData,
-            DiplomaticCountryTradeSheetData sData,
-            TypeTradeSheet typeTradeSheet,
-            List<DiplomaticTradeSheetDetailInfoUI> ____infoList)
-        {
-            Run("economy.detail-price", () =>
-                CustomMOD.DiplomaticTradeSheetDetailContentsUI_SetData(__instance, cData, sData, typeTradeSheet, ____infoList));
-        }
-
         public static void T_Citizen_JobSet(T_Citizen __instance)
         {
             Run("citizen.job", () => CustomMOD.T_Citizen_JobSet(__instance));

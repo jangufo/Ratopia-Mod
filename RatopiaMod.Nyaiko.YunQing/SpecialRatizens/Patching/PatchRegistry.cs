@@ -70,7 +70,6 @@ namespace SpecialRatizens.Patching
                 Postfix("economy.trade-result", () => Method(typeof(DiplomaticMgr), "OnTradeResultEvent", typeof(TradeResult)), "DiplomaticMgr_OnTradeResultEvent_BGNYQY"),
                 Postfix("economy.distance", () => Method(typeof(DiplomaticData), "SetTerrainTotalDistance", typeof(DiplomaticWorldTerrainEntity)), "DiplomaticData_SetTerrainTotalDistance"),
                 Prefix("economy.agreement-count", () => AccessTools.PropertyGetter(typeof(DiplomaticCountryData), "MaxTradeAgreementCount"), "DiplomaticCountryData_MaxTradeAgreementCount"),
-                Postfix("economy.detail-price", () => Method(typeof(DiplomaticTradeSheetDetailContentsUI), "SetData", typeof(DiplomaticCountryData), typeof(DiplomaticCountryTradeSheetData), typeof(TypeTradeSheetCategory), typeof(TypeTradeSheet)), "DiplomaticTradeSheetDetailContentsUI_SetData"),
 
                 Postfix("citizen.job", () => Method(typeof(T_Citizen), "JobSet", typeof(Building)), "T_Citizen_JobSet"),
                 Prefix("combat.sword-attack", () => Method(typeof(T_Citizen), "SwdAtk_Call"), "T_Citizen_SwdAtk_Call"),

@@ -17,10 +17,6 @@ namespace SpecialRatizens.Configuration
 
             Enabled = config.Bind("General", "Enabled", true,
                 "启用特殊鼠鼠的生成与特性效果。关闭时仍注册特性定义，以便读取已有存档。");
-            OnlyGoodCharacteristic = config.Bind("Generation", "OnlyGoodCharacteristic", false,
-                "移民候选全部为正面特性（仅影响特殊鼠鼠 mod 的候选生成流程）。");
-            NewCitizenGenderLimit = config.Bind("Generation", "NewCitizenGenderLimit", -1,
-                "移民性别限制：-1 不限制（原版行为），0 仅男性，1 仅女性。");
 
             Instance = this;
         }
@@ -29,11 +25,5 @@ namespace SpecialRatizens.Configuration
 
         /// <summary>启用特殊鼠鼠</summary>
         public ConfigEntry<bool> Enabled { get; }
-
-        /// <summary>移民候选全正面特性</summary>
-        public ConfigEntry<bool> OnlyGoodCharacteristic { get; }
-
-        /// <summary>移民性别限制</summary>
-        public ConfigEntry<int> NewCitizenGenderLimit { get; }
     }
 }

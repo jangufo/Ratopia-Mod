@@ -14,18 +14,6 @@
 
 - 12 名特殊鼠鼠（`Data/CustomSpecialUnit.csv`），24 个自定义特性（`Data/CustomCharInfo.csv`），24 张特性图标（`Data/Icon/*.png`）。
 - 保留原刷新概率（万分比）、保底、繁荣度概率加成、三维/金币、外观（Spine 皮肤组合）与特性效果（战斗、幸福度、贸易、工作、电力、机器人）。
-- 关闭整合版中无关的设置窗口、共享仓库、AI、乌托邦等功能。
-
-代码分层：
-
-| 层 | 文件 | 职责 |
-| --- | --- | --- |
-| 入口 | `Plugin.cs` | BepInEx 插件、配置 `General.Enabled`、Harmony 安装/回滚、故障隔离边界 |
-| 数据 | `Core/SpecialDataCatalog.cs`、`Core/CsvTable.cs` | CSV 全量校验加载（表头、枚举、概率范围、特性唯一归属、图标文件存在性），失败整体拒绝 |
-| 选择引擎 | `Core/SpecialSelectionEngine.cs`、`Core/SpecialRegistry.cs` | 纯逻辑：概率抽取、保底阈值 10000、繁荣度加成、`IsUsed` 去重、保底值写回 |
-| 策略 | `Core/SpecialNamePolicy.cs`、`Core/ProsperityBaselinePolicy.cs`、`Core/SkinRepairPolicy.cs`、`Core/CustomIconKeys.cs`、`Core/PluginDataPaths.cs` | 名字规范化（去颜色标签）、秦律繁荣基线幂等、皮肤修复回退、图标双键、`DLL 同级/Data` 路径解析 |
-| 补丁 | `Patching/PatchRegistry.cs`、`PatchDescriptor.cs`、`LegacyPatchAdapters.cs`、`SessionPatches.cs` | 39 个白名单 Harmony 补丁，逐个安装，任一失败整体回滚；执行期异常回退原版行为 |
-| 遗留核心 | `Legacy/CustomMOD.cs`（约 1.1 万行）及 `Legacy/` 其余 | 实际业务：会话状态、候选生成、招募登记、24 特性公式、图标、皮肤 |
 
 ## 2. 启动与数据注册流程
 
@@ -99,12 +87,12 @@
 
 ## 5. 防重复招募机制现状（三层 + 一道护栏）
 
-| 层 | 位置 | 内容 | 失效条件 |
-| --- | --- | --- | --- |
-| 1 | `CustomSpecialUnit.isUsed` | 会话内「已拥有」标记，招募/读档识别时置 true，会话重置时清零 | 会话重置（读档收尾）后、重建前的时间窗；或该特殊鼠不在当前市民列表（死亡/丢失） |
-| 2 | `usedNames` | 当前存档全体市民规范化名字；候选过滤时 `IsTaken(unit.name, usedNames)` | 只在 `LoadCitizenDatas`（读档收尾）重建；读档中途（列表重建时）为空或陈旧 |
-| 3 | `SpecialCitizens.ContainsKey` | `AddSpecialCitizen` 内部防重复登记 | 只阻止「登记」，不阻止「市民本体生成」——第二副本照样进世界 |
-| 护栏 | `CCMake_Info` 前缀 2899 行 | 构造候选卡前按 `Citizens` 名字查重 | 读档路径上 `Citizens` 尚未填充（市民在 UnitData 步才生成），护栏形同虚设 |
+| 层   | 位置                          | 内容                                                                   | 失效条件                                                                        |
+| ---- | ----------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 1    | `CustomSpecialUnit.isUsed`    | 会话内「已拥有」标记，招募/读档识别时置 true，会话重置时清零           | 会话重置（读档收尾）后、重建前的时间窗；或该特殊鼠不在当前市民列表（死亡/丢失） |
+| 2    | `usedNames`                   | 当前存档全体市民规范化名字；候选过滤时 `IsTaken(unit.name, usedNames)` | 只在 `LoadCitizenDatas`（读档收尾）重建；读档中途（列表重建时）为空或陈旧       |
+| 3    | `SpecialCitizens.ContainsKey` | `AddSpecialCitizen` 内部防重复登记                                     | 只阻止「登记」，不阻止「市民本体生成」——第二副本照样进世界                      |
+| 护栏 | `CCMake_Info` 前缀 2899 行    | 构造候选卡前按 `Citizens` 名字查重                                     | 读档路径上 `Citizens` 尚未填充（市民在 UnitData 步才生成），护栏形同虚设        |
 
 ## 6. 重复招募根因分析
 
@@ -165,7 +153,7 @@
   - `General.Enabled`（原 CustomSpecialUnit）；
   - `Generation.OnlyGoodCharacteristic`（移民候选全正面特性）；
   - `Generation.NewCitizenGenderLimit`（-1 不限制 / 0 男 / 1 女）。
-  整合版遗留但独立版未安装补丁的 29 个设置开关收进 `CustomMOD.LegacySettings`（静态默认值，仅供遗留代码路径读取，不再序列化为任何文件）。
+    整合版遗留但独立版未安装补丁的 29 个设置开关收进 `CustomMOD.LegacySettings`（静态默认值，仅供遗留代码路径读取，不再序列化为任何文件）。
 - **路径标准化**：`Core/PluginDataPaths` 改用 BepInEx `Paths.PluginPath` + `System.IO.Path.Combine`（`BepInEx/plugins/SpecialRatizens/Data`）；`CustomMOD.CustomDataPath` 不再保存尾部分隔符，全部路径拼接走 `Path.Combine`。
 - **CSV 彻底清退**（第二步重构补遗）：
   - **敌方死亡掉落功能整体移除**（`CustomEnemyDrop` / `EnemyDropDatas` / `LoadEnemyDropDatas` / `GameEnemy_DeathCheck` / `EliteEnemy_DeathCheck`）：这是整合版的遗留功能——通过 `CustomEnemyDrop.csv`（列：Name=敌人类型、T_Name=显示名、DropList=掉落物列表）为每种敌人配置自定义死亡掉落，开关 `EnemyDeadthDrop` 开启后在敌人死亡位置按概率生成物品。独立版从未安装对应的死亡补丁、开关默认关闭、且 Data 目录里从来没有这个 CSV，属于彻底死代码。
@@ -207,3 +195,34 @@
 - `SpecialRatizens.csproj` 新增引用 `Utility.Savable.SavableData.dll`（游戏 Managed 目录，Private=false）。
 - Debug 构建 0 警告 0 错误（补丁总数 39 → 41）。
 - 冒烟测试（真实游戏程序集 + 编译产物）：`PlayDataMgr.LoadData(D_Data)` / `SetMods(string[])` 目标唯一且签名匹配；适配器与处理器按 Harmony 注入约定对齐；游戏真实 `SavableData` 类型 `Create/AddData/HasKey/GetValue<string>` 中文键值往返一致；`ModsSavePayload`（产物内私有类型）Newtonsoft 序列化/反序列化闭环一致。
+
+## 11. 附录：最激进裁剪（只留特殊鼠鼠，数据只存 ModsData 与 ConfigFile）
+
+### 11.1 裁剪原则（用户指令）
+
+- 除特殊鼠鼠外的全部功能一律删除；不再保留整合版遗留的任何设置窗口、快捷键、场景钩子、存档 side-car 文件。
+- 数据只允许存在于两处：存档内 `D_Data.ModsData`（键 `"SpecialRatizens"`）与 BepInEx `ConfigFile`（仅 `General.Enabled`）。
+- 皮肤系统经确认**保留专属外观**（`RegisterCustomSkin` / `SpecialCitizenSkins` / `UpdateUnitSpineDress` 链路 + JSON 皮肤字段），但删除玩家自定义市民皮肤编辑器。
+
+### 11.2 判定关键：哪些"系统类"补丁其实是特性效果基建
+
+逐个核读效果区实现后确认：`power.*`（奥米伽-7 量子电网/机械供电）、`industry.*`（皮卡丘鼠力发电站、大正蘑菇农场、李隆基访客数）、`economy.*`（白圭贸易价格、王亥距离与协议数）、`citizen.job`（岳家军）、`combat.sword-attack` / `combat.citizen-attacked`（岳家枪/七探蛇盘枪/神医在世/奥米伽免死）、`state.*`（联邦的希望产金、状态图标/名称/描述、PDI 缓存）全部是 24 特性公式的载体，**全部保留**。`appearance.*` 两个服装补丁服务特殊鼠鼠专属外观，保留。
+
+### 11.3 删除清单
+
+- `CustomMOD.cs` 由 10712 行裁至 3345 行：删除名称表、LegacySettings（29 个死开关）、自定义存档设置（`.set` side-car + `SystemMgr_SystemPause` / `PlayDataMgr_Save(_Post)` / `SaveLoadMgr_SaveAsync_Zip`）、开始游戏界面（地图种子）、IMGUI 设置界面（约 35 个按钮）、操作监听、自定义快捷键、跳转场景、`TileMgr_All_NotUseListClear` 旧处理器、DB 初始化遗留（`DB_Mgr_Awake` / `Res_DB_Setting` / `Build_DB_Setting`、`OutPutGameDatas` / `OutPutJsonData`、好特征/仓库/物品价格表加载）、全正面特征、更多负重/经验/猎手减伤/连续拾取/默认选中/建造无需材料/友方掉落无伤/共享床位/贸易消息/贸易详细/乌托邦/和平模式/无限人口/输入框限制/移动路径/地图编辑/共享仓库/仓库直供/更多名称/AI 相关（含 `CitizenDesireThreshold`）/饭桌优化/寻路相关/女王建造与女王 Update 解析/无人机翻倍/机器人翻倍/Defines 反射工具/测试用，以及玩家皮肤编辑器（`CitizenInfoUI_Show/Hide`、`CitizenCustomSkins`、`Save/LoadCustomSkinSetting`）。
+- 补丁 41 → 40：删除 `economy.detail-price`（贸易详细信息，唯一服务于已删功能的补丁）；其余 40 个均为特殊鼠鼠本体或特性效果。
+- 文件删除：`Legacy/Settings.cs`（`GameSaveCustomSettings` side-car 数据类）、`Core/NameTableStore.cs`（更多姓名）、`Data/Names.json`。
+- `ModConfig` 裁至 `General.Enabled` 一项；`CustomMOD.ActiveCustomSpecialUnit` 改为只读直读配置（原 setter 的效果刷新副作用由 `SpecialRatizensSessionLoaded` / 事件补丁承担）。
+- `CCMake_Info` 删除移民性别限制分支；`MakeCharacterList` 保留（`DefaultChar1Count/DefaultChar2Count` 上限仍是"自定义特性只归属特殊鼠鼠"的护栏），仅删全正面特征分支；`T_Citizen_BeAttacked` 删友方掉落无伤分支（保留神医在世 + 奥米伽免死）。
+- `BaseCommand` 裁至图标加载（`LoadSprite` / `LoadSpriteFromTexture2D` / `LoadTextureFromFile` / `LoadFile`）与枚举转换（`StringToEnum` 等），删除 JSON 存取/反射工具（皮肤编辑器专用）。
+
+### 11.4 保留清单（功能面）
+
+12 鼠鼠 JSON 数据与图标、24 特性注册与图标、洞穴候选选择（保底 `pdr_C` 持久化 + `isUsed` 去重 + 名字占用护栏）、招募强制命名与三维/金币覆盖、死亡后遗体名单判定可再招募、24 特性效果（含奥米伽-7 量子电网全链路）、专属皮肤注册与 Spine 重建（含职业皮肤、修复回退）、`D_Data.ModsData` 持久化与老存档无键兼容、`session.loaded` 会话重建。
+
+### 11.5 构建与验证（本轮）
+
+- Debug 构建 0 警告 0 错误；region 12/12 平衡、大括号 556/556 平衡。
+- 全项目残留扫描：`LegacySettings` / `NewCitizenGenderLimit` / `NameTableStore` / `GameSaveCustomSet` / `CitizenCustomSkins` / `Defines*` / `UtopiaMode` 等 60+ 个已删符号 0 命中。
+- 反射冒烟测试（真实游戏程序集 + BepInEx core + 编译产物）：37 个保留方法、9 个核心字段全部存在；17 个代表性遗留方法确认从产物中消失；`ModConfig` 仅剩 `Enabled`。

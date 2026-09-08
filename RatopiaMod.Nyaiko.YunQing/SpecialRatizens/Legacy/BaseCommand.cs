@@ -1,21 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace RatopiaMod
 {
     internal class BaseCommand
     {
-        /// <summary>
-        /// 字段访问类型
-        /// </summary>
-        public static BindingFlags Flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-
         public static TextureWrapMode TexWrapMode = TextureWrapMode.Clamp;
 
         public static FilterMode FilMode = FilterMode.Bilinear;
@@ -190,90 +180,5 @@ namespace RatopiaMod
 
             return $"{str.Substring(0, 1).ToUpper()}{str.Substring(1)}";
         }
-
-        public static void SetFieldValue<T>(T obj, string field, object value)
-        {
-            typeof(T).GetField(field).SetValue(obj, value);
-        }
-
-        public static bool SaveObjectToJson(string path, object obj, string foldPath = "")
-        {
-            if (obj == null)
-                return false;
-
-            try
-            {
-                return SaveFile(path, foldPath, JsonConvert.SerializeObject(obj));
-            }
-            catch
-            {
-                Debug.LogError($"Save Data {obj.GetType()} Faild");
-
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// JSON文件转类
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="path"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static bool LoadObjectByJson<T>(string path, out T result)
-        {
-            result = default;
-
-            try
-            {
-                string text = File.ReadAllText(path, Encoding.UTF8);
-
-                result = JsonConvert.DeserializeObject<T>(text);
-
-                return true;
-            }
-            catch
-            {
-                Debug.Log($"Load Data {typeof(T)} Faild, From {path}");
-
-                return false;
-            }
-        }
-
-        public static bool SaveFile(string path, string folderPath, string content)
-        {
-            try
-            {
-                //Debug.Log($"Save Data {content} In Path {path}");
-
-                if (content == null)
-                    return false;
-
-                if (!folderPath.Equals("") && !Directory.Exists(folderPath))
-                    Directory.CreateDirectory(folderPath);
-
-                FileStream fs = new FileStream(path, FileMode.Create);
-
-                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
-                {
-                    sw.Write(content);
-
-                    sw.Flush();
-
-                    sw.Close();
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-
-                Debug.LogWarning($"{path} 保存错误 {ex}");
-
-                return false;
-            }
-        }
-
-
     }
 }
