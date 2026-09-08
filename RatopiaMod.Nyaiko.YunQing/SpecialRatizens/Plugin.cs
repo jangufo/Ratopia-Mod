@@ -1,10 +1,9 @@
 using System;
-using System.IO;
 using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using RatopiaMod;
+using SpecialRatizens.Configuration;
 using SpecialRatizens.Core;
 using SpecialRatizens.Patching;
 
@@ -18,37 +17,30 @@ namespace SpecialRatizens
         public const string PluginVersion = "0.1.5";
 
         private Harmony _harmony;
-        private ConfigEntry<bool> _enabled;
         private bool _patchingSucceeded;
 
         internal static Plugin Instance { get; private set; }
 
-        internal static bool Enabled => Instance != null && Instance._enabled != null && Instance._enabled.Value;
+        internal static bool Enabled => ModConfig.Instance != null && ModConfig.Instance.Enabled.Value;
 
         private void Awake()
         {
             Instance = this;
-            _enabled = Config.Bind(
-                "General",
-                "Enabled",
-                true,
-                "启用特殊鼠鼠的生成与特性效果。关闭时仍注册特性定义，以便读取已有存档。");
 
             try
             {
-                var dataRoot = PluginDataPaths.ResolveDataRoot(typeof(Plugin).Assembly.Location);
-                var catalog = SpecialDataCatalog.Load(
-                    Path.Combine(dataRoot, "CustomSpecialUnit.csv"),
-                    Path.Combine(dataRoot, "CustomCharInfo.csv"),
-                    Path.Combine(dataRoot, "Icon"));
+                new ModConfig(Config);
 
-                CustomMOD.ConfigureSpecialRatizens(_enabled.Value, dataRoot);
+                var dataRoot = PluginDataPaths.ResolveDataRoot();
+                var catalog = SpecialDataCatalog.Load(dataRoot);
+
+                CustomMOD.ConfigureSpecialRatizens(dataRoot, catalog);
                 _harmony = new Harmony(PluginGuid);
                 PatchRegistry.InstallAll(_harmony, Logger);
                 _patchingSucceeded = true;
                 Logger.LogInfo(
                     $"{PluginName} v{PluginVersion} 已加载：{catalog.Ratizens.Count} 名特殊鼠鼠、{catalog.Traits.Count} 个特性；" +
-                    $"功能当前{(_enabled.Value ? "开启" : "关闭")}。");
+                    $"功能当前{(Enabled ? "开启" : "关闭")}。");
             }
             catch (Exception error)
             {

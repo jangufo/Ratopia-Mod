@@ -149,3 +149,21 @@
 - 版本统一为 0.1.5（csproj `Version/AssemblyVersion/FileVersion` + `Plugin.PluginVersion`）。
 - csproj 新增：`Data\**\*` 随构建输出（满足 `ResolveDataRoot` 的「DLL 同级 Data」约定）；`InstallSpecialRatizensData` 目标在 Release 构建的共享安装步骤后把 `Data/` 一并拷入 `BepInEx/plugins/SpecialRatizens/`，避免只装 DLL 的半安装状态。
 - 旧目录 `SpecialRatizens/`（含测试项目与其 sln）保持原样未动，作为对照基线。
+
+---
+
+## 9. 附录：v0.1.5 第二步重构记录（数据与配置 JSON 化）
+
+> 本文第 1–8 节撰写于重构前，其中「CSV」的描述自本节起由 JSON 取代；流程与行为语义不变。
+
+- **数据文件 JSON 化**（`Data/` 目录，随构建输出）：
+  - `CustomSpecialUnit.json`：12 名特殊鼠鼠，字段名与原 CSV 列名一致，数组顺序即注册顺序（特性 Index 绑定依赖顺序，禁止重排）；
+  - `CustomCharInfo.json`：24 个自定义特性；
+  - `Names.json`：原 CustomMOD 内置的姓名表（姓氏 508 / 女名 89+1377 / 男名 136+371），由 `Core/NameTableStore` 惰性加载（首次访问才读文件），缺失或损坏时降级为空表。
+- **加载与校验**：`Core/SpecialDataCatalog.Load(dataRoot)` 用 Newtonsoft.Json 直接反序列化为运行时对象（`CharacterInfo` / `CustomSpecialUnit`），并保留原有全量校验（字段缺失、名称重复、Category 0/1、概率 0–10000、特性引用、特性唯一归属、图标文件存在性），失败抛 `InvalidDataException` 整体拒绝；`Legacy/CsvTable.cs` 与 BaseCommand 的 CSV 解析在数据路径上退役。已通过「游戏程序集 + 编译产物」的真实加载冒烟测试（12/24 全量绑定、损坏 JSON、缺字段均按预期报错）。
+- **配置 BepInEx 化**：废弃自管 `CustomSettings.json`（`LoadCustomSettings/SaveCustomSettings` 已删除）。活跃设置改由 `Configuration/ModConfig` 以 `ConfigEntry<T>` 承载，节/键与旧 `General.Enabled` 兼容：
+  - `General.Enabled`（原 CustomSpecialUnit）；
+  - `Generation.OnlyGoodCharacteristic`（移民候选全正面特性）；
+  - `Generation.NewCitizenGenderLimit`（-1 不限制 / 0 男 / 1 女）。
+  整合版遗留但独立版未安装补丁的 29 个设置开关收进 `CustomMOD.LegacySettings`（静态默认值，仅供遗留代码路径读取，不再序列化为任何文件）。
+- **路径标准化**：`Core/PluginDataPaths` 改用 BepInEx `Paths.PluginPath` + `System.IO.Path.Combine`（`BepInEx/plugins/SpecialRatizens/Data`）；`CustomMOD.CustomDataPath` 不再保存尾部分隔符，全部路径拼接走 `Path.Combine`。
