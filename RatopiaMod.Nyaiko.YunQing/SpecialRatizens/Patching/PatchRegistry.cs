@@ -45,6 +45,9 @@ namespace SpecialRatizens.Patching
                 Prefix("generation.default-trait-boundary", () => Method(typeof(CCMake_Info), "MakeCharacterList"), "CCMake_Info_MakeCharacterList"),
                 Postfix("generation.citizen-created", () => Method(typeof(T_Citizen), "MakeCtizen_ByCC", typeof(Vector2), typeof(CCMake_Info)), "T_Citizen_MakeCtizen_ByCC"),
 
+                Postfix("save.data-loaded", () => Method(typeof(PlayDataMgr), "LoadData", typeof(D_Data)), "PlayDataMgr_LoadData"),
+                Postfix("save.mods-set", () => Method(typeof(PlayDataMgr), "SetMods", typeof(string[])), "PlayDataMgr_SetMods"),
+
                 Postfix("power.robot-created", () => Method(typeof(GBot), "MakeCitizen", typeof(Vector2), typeof(int)), "GBot_MakeCitizen"),
                 Prefix("power.robot-fatigue", () => Method(typeof(GBot), "FatigueUpate", typeof(float), typeof(bool)), "GBot_FatigueUpate"),
                 Prefix("power.connect-building", () => Method(typeof(ElecLine_Info), "AddConnectUseBuild", typeof(int), typeof(float)), "ElecLine_Info_AddConnectUseBuild"),

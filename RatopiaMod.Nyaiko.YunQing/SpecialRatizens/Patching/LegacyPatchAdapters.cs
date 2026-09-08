@@ -38,6 +38,16 @@ namespace SpecialRatizens.Patching
             Run("generation.citizen-created", () => CustomMOD.T_Citizen_MakeCtizen_ByCC(__instance, _info));
         }
 
+        public static void PlayDataMgr_LoadData(D_Data data)
+        {
+            Run("save.data-loaded", () => CustomMOD.PlayDataMgr_LoadData(data));
+        }
+
+        public static void PlayDataMgr_SetMods(string[] keys)
+        {
+            Run("save.mods-set", CustomMOD.PlayDataMgr_SetMods);
+        }
+
         public static void GBot_MakeCitizen(GBot __instance, int _index)
         {
             Run("power.robot-created", () => CustomMOD.GBot_MakeCitizen(__instance, _index));

@@ -9,6 +9,7 @@ using CasselGames.Input;
 using CasselGames.UI;
 using HarmonyLib;
 using I2.Loc;
+using Newtonsoft.Json;
 using RatopiaMod;
 using Spine;
 using SpecialRatizens.Core;
@@ -1699,6 +1700,138 @@ namespace RatopiaMod
 
         #endregion
 
+        #region 存档持久化
+
+        /// <summary>
+        /// 本插件在存档 ModsData 中的数据键名。
+        /// </summary>
+        const string ModsDataKey = "SpecialRatizens";
+
+        /// <summary>
+        /// 读档时从存档 ModsData 恢复的保底计数（鼠名 → pdr_C）。
+        /// </summary>
+        static readonly Dictionary<string, int> PersistedPity = new Dictionary<string, int>();
+
+        /// <summary>
+        /// 存档 ModsData 载荷。
+        /// </summary>
+        class ModsSavePayload
+        {
+            public int version = 1;
+
+            public Dictionary<string, int> pity = new Dictionary<string, int>();
+        }
+
+        /// <summary>
+        /// 读档完成（D_Data 反序列化之后、地图加载之前）：
+        /// 恢复持久化的保底计数，并按存档市民数据把「已拥有 ∪ 留有遗体」的特殊鼠鼠提前标记为已消耗，
+        /// 使 SysMgr 步骤的洞列表重建不再把已拥有的鼠鼠滚入候选列表（修复同一存档重复招募的时序竞态）。
+        /// </summary>
+        public static void PlayDataMgr_LoadData(D_Data data)
+        {
+            if (data == null)
+                return;
+
+            PersistedPity.Clear();
+
+            Utility.Savable.SavableData mods = data.ModsData;
+
+            if (mods != null && mods.HasKey(ModsDataKey))
+            {
+                string json = mods.GetValue<string>(ModsDataKey, null);
+
+                try
+                {
+                    ModsSavePayload payload = string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<ModsSavePayload>(json);
+
+                    if (payload != null && payload.pity != null)
+                    {
+                        foreach (KeyValuePair<string, int> pair in payload.pity)
+                            PersistedPity[pair.Key] = pair.Value;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"特殊鼠鼠存档数据解析失败，保底计数按零处理：{ex.Message}");
+                }
+            }
+
+            if (!ActiveCustomSpecialUnit)
+                return;
+
+            //恢复保底计数（招募时 AddSpecialCitizen 会清零，已拥有的鼠鼠存档值恒为 0，互不冲突）
+            foreach (KeyValuePair<string, int> pair in PersistedPity)
+            {
+                if (TryGetSpecialUnit(pair.Key, out CustomSpecialUnit unit))
+                    unit.pdr_C = pair.Value;
+            }
+
+            //按存档数据推导已消耗集合：存活市民 ∪ 死亡名单（遗体仍在时不重新招募，遗体消失后即可再次招募）
+            HashSet<string> consumed = new HashSet<string>();
+
+            AppendConsumedNames(data.List_Citizen, consumed);
+
+            AppendConsumedNames(data.List_DeathCitizen, consumed);
+
+            if (consumed.Count == 0)
+                return;
+
+            foreach (CustomSpecialUnit unit in CustomSpecialUnitDatas.Values)
+            {
+                if (consumed.Contains(SpecialNamePolicy.Normalize(unit.name)))
+                    unit.isUsed = true;
+            }
+
+            Debug.LogWarning($"特殊鼠鼠读档恢复完成：已消耗标记 {consumed.Count} 项，保底恢复 {PersistedPity.Count} 项");
+        }
+
+        /// <summary>
+        /// 收集存档市民数据中的特殊鼠鼠名（存活名单与死亡名单共用）。
+        /// </summary>
+        static void AppendConsumedNames(List<Citizen_Data> list, HashSet<string> consumed)
+        {
+            if (list == null)
+                return;
+
+            foreach (Citizen_Data citizen in list)
+            {
+                if (citizen == null || string.IsNullOrWhiteSpace(citizen.m_UnitName))
+                    continue;
+
+                consumed.Add(SpecialNamePolicy.Normalize(citizen.m_UnitName));
+            }
+        }
+
+        /// <summary>
+        /// 存档数据收集（PlayDataMgr.Save 末尾的 SetMods）：
+        /// 把当前保底计数写入存档 ModsData，随存档持久化（修复读档清零保底）。
+        /// </summary>
+        public static void PlayDataMgr_SetMods()
+        {
+            if (!ActiveCustomSpecialUnit)
+                return;
+
+            D_Data data = PlayDataMgr.Instance != null ? PlayDataMgr.Instance.m_GameData : null;
+
+            if (data == null)
+                return;
+
+            if (data.ModsData == null)
+                data.ModsData = Utility.Savable.SavableData.Create();
+
+            Dictionary<string, int> pity = new Dictionary<string, int>();
+
+            foreach (CustomSpecialUnit unit in CustomSpecialUnitDatas.Values)
+            {
+                if (unit.pdr_C != 0)
+                    pity[unit.name] = unit.pdr_C;
+            }
+
+            data.ModsData.AddData(ModsDataKey, JsonConvert.SerializeObject(new ModsSavePayload { pity = pity }));
+        }
+
+        #endregion
+
         #region 地图加载
 
         /// <summary>
@@ -1783,6 +1916,28 @@ namespace RatopiaMod
                 foreach (CharacterInfo info in citizen.List_CharInfoValue)
                 {
                     UpdateCustomCharInfoUser(info.Name, citizen);
+                }
+            }
+
+            //存档中留有遗体的特殊鼠鼠同样视为已消耗并保留其名字，
+            //避免普通市民占用名字导致遗体消失后该鼠鼠永远无法再次招募。
+            List<Citizen_Data> deathList = GameData != null ? GameData.List_DeathCitizen : null;
+
+            if (deathList != null)
+            {
+                foreach (Citizen_Data dead in deathList)
+                {
+                    if (dead == null || !TryGetSpecialUnit(dead.m_UnitName, out CustomSpecialUnit deadUnit) || deadUnit.isUsed)
+                        continue;
+
+                    deadUnit.isUsed = true;
+
+                    string deadNormalizedName = SpecialNamePolicy.Normalize(deadUnit.name);
+
+                    if (deadNormalizedName.Length > 0 && !SpecialNamePolicy.IsTaken(deadNormalizedName, usedNames))
+                        usedNames.Add(deadNormalizedName);
+
+                    Debug.LogWarning($"特殊鼠鼠 {deadUnit.name} 留有遗体，暂不重新出现");
                 }
             }
         }

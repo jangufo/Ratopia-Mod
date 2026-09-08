@@ -13,6 +13,7 @@
 
 
 	<ItemGroup>
+		<Reference Include="Utility.Savable.SavableData" HintPath="$(GameManagedDir)\Utility.Savable.SavableData.dll" Private="false" />
 		<Reference Include="LitJson" HintPath="$(GameManagedDir)\LitJson.dll" Private="false" />
 		<Reference Include="Newtonsoft.Json" HintPath="$(GameManagedDir)\Newtonsoft.Json.dll" Private="false" />
 		<Reference Include="spine-csharp" HintPath="$(GameManagedDir)\spine-csharp.dll" Private="false" />

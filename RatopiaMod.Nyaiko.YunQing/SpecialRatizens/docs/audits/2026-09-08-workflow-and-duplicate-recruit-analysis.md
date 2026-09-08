@@ -172,3 +172,38 @@
   - **游戏数据库 CSV 导出脚手架移除**（`OutPutCSVDatas` 及 `OutPutGameDatas` 中 40 处调用）：整合版开发期把原版游戏 40 张数据库表导出为 CSV 的调试工具，与特殊鼠鼠功能无关；`OutPutGameDatas` 保留 JSON 导出（SkinBunlde）。
   - **BaseCommand 精简**（714 → 约 280 行）：删除 `LoadCsvData` 全家族（泛型/字典/反射映射/文本解析）、两个 `SaveCsvData`、`ReplaceCsvText`、`ObjectToCsvText`、`CsvTextToObject`、`SaveFileData` 及仅被 CSV 链使用的 `ObjectToJson`/`JsonToObject`；保留仍被皮肤存档与 JSON 导出使用的 `SaveObjectToJson`/`LoadObjectByJson`/`SaveFile`，并修正 `LoadObjectByJson` 上误标的「CSV文本转类」注释。`Legacy/CsvData.cs`、`Legacy/CustomEnemyDrop.cs` 两个文件删除。
   - 至此**所有 .cs 文件零 CSV 引用**，数据面仅存 JSON（`Data/*.json`）与 PNG（`Data/Icon/`）。
+
+## 10. 附录：重复招募修复实现（D_Data.ModsData 持久化 + 读档时序修复）
+
+> 落实第 6.3 节的修复方向 (b)（提前恢复时序）与 (e)（持久化状态）；(c)（招募路径尊重返回值）由既有的 `CCMake_Info` 名称守卫（跳过重复名候选）覆盖，时序修复后该路径不可达。
+
+### 10.1 存档容器：D_Data.ModsData
+
+- `D_Data.ModsData` 是游戏存档自带的 `Utility.Savable.SavableData`——通用命名键值存储（`AddData(key, value)` / `GetValue<T>(key, default)` / `HasKey(key)` / `Create()`），随 D_Data 一起序列化进存档、随存档复制分享。
+- 游戏自身仅用 `"Mods"` 键记录存档时的模组清单（`PlayDataMgr.Save()` 最后一步 `SetMods`）。本插件新增键 `"SpecialRatizens"`，载荷为 JSON 字符串：`{"version":1,"pity":{"鼠名":pdr_C}}`。
+- 关键时序：读档协程在异步反序列化完成后调 `PlayDataMgr.LoadData(D_Data)`，**早于** `LoadSettingC` 的全部步骤——这是把状态恢复插到「洞列表重建（SysMgr 步骤）」之前的唯一干净窗口。
+
+### 10.2 两个新补丁
+
+- **`save.data-loaded`**：`PlayDataMgr.LoadData` Postfix → `CustomMOD.PlayDataMgr_LoadData`：
+  - 读取 ModsData 中的 `pity`，直接恢复各鼠鼠 `pdr_C`（损坏载荷告警并按零处理）；
+  - 按**存档数据本身**推导已消耗集合（`D_Data.List_Citizen` 存活 ∪ `D_Data.List_DeathCitizen` 遗体，按名字归一化匹配），把对应鼠鼠 `isUsed = true`——此后 SysMgr 步骤的洞列表重建自然排除它们，**读档竞态从根上消除**。
+- **`save.mods-set`**：`PlayDataMgr.SetMods` Postfix → `CustomMOD.PlayDataMgr_SetMods`：`SetMods` 是 `PlayDataMgr.Save()` 的最后一步、zip 序列化之前，此处把当前全部非零 `pdr_C` 写入 ModsData，随存档持久化。
+
+### 10.3 会话重建增补（`LoadCitizenDatas`）
+
+- 原逻辑只按特性匹配存活市民重建 `isUsed`，会把「有遗体」的鼠鼠重新开放招募。增补：遍历 `GameData.List_DeathCitizen`，遗体尚在的特殊鼠鼠同样标记 `isUsed` 并把名字占进 `usedNames`（防止普通市民占用名字导致遗体消失后永久无法再次招募）。
+
+### 10.4 行为语义与兼容性
+
+- **死亡策略（用户选定）**：死亡后可再次招募——以「遗体是否仍在死亡名单」为准；遗体被游戏移除后该鼠鼠重新进入候选池，且保底计数延续存档值。
+- **保底持久化（用户选定）**：`pdr_C` 随存档保存/恢复，读档不再清零（原 `AddSpecialCitizen` 在会话重建时把已拥有鼠鼠保底清零的行为保留——招募时清零本就是设计语义，且已拥有鼠鼠存档值恒为 0）。
+- **老存档兼容**：无 `"SpecialRatizens"` 键 → 保底按零、已消耗由存档名单推导，行为与修复前一致（除竞态消除外无变化）。
+- **历史受损存档**：此前因 bug 产生的同名双份特殊市民，名字匹配会把两个都标记为已拥有，不会误开放。
+- 新游戏不经过 `LoadData`，会话状态由既有 `session.loaded` 补丁（`ResetSpecialRatizensSession`）自愈，无需额外钩子。
+
+### 10.5 构建与验证
+
+- `SpecialRatizens.csproj` 新增引用 `Utility.Savable.SavableData.dll`（游戏 Managed 目录，Private=false）。
+- Debug 构建 0 警告 0 错误（补丁总数 39 → 41）。
+- 冒烟测试（真实游戏程序集 + 编译产物）：`PlayDataMgr.LoadData(D_Data)` / `SetMods(string[])` 目标唯一且签名匹配；适配器与处理器按 Harmony 注入约定对齐；游戏真实 `SavableData` 类型 `Create/AddData/HasKey/GetValue<string>` 中文键值往返一致；`ModsSavePayload`（产物内私有类型）Newtonsoft 序列化/反序列化闭环一致。
