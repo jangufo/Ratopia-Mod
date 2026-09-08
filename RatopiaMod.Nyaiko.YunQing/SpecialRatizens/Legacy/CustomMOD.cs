@@ -780,8 +780,24 @@ namespace RatopiaMod
             if (CustomRatizenCatalog == null)
                 throw new InvalidDataException("特殊鼠鼠数据尚未初始化。未修改游戏特性数据库。");
 
-            //加载自定义特性（JSON 数据已在插件启动时完成全量校验）
-            List<CharacterInfo> customInfos = new List<CharacterInfo>(CustomRatizenCatalog.RuntimeTraits);
+            //加载自定义特性（每次会话重建实例：游戏读档会原地清空 ScriptableObject 中已注册特性的
+            //显示字段（T_Name/Description/Icon），而启动时缓存的 RuntimeTraits 对象与 DB 条目是同一批引用，
+            //复用它们会让 UpdateCharDB「已存在分支」的回填变成自赋值，导致详情面板特性名/描述空白。
+            //SpecialTraitDefinition 持有解析时固化的不可变字符串，用它重建可恢复旧版「每会话全新对象」的语义。）
+            List<CharacterInfo> customInfos = new List<CharacterInfo>();
+
+            foreach (SpecialTraitDefinition trait in CustomRatizenCatalog.Traits)
+            {
+                customInfos.Add(new CharacterInfo
+                {
+                    Category = trait.Category,
+                    Name = trait.Name,
+                    T_Name = trait.DisplayName,
+                    EffectValue_A = trait.EffectValueA,
+                    EffectValue_B = trait.EffectValueB,
+                    Description = trait.Description
+                });
+            }
 
             //加载特殊单位
             List<CustomSpecialUnit> customUnits = new List<CustomSpecialUnit>(CustomRatizenCatalog.RuntimeRatizens);
