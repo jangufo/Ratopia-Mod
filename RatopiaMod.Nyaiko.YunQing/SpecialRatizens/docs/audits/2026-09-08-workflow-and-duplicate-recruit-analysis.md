@@ -236,3 +236,12 @@
   - `names.citizen-recorded`（postfix）→ `T_Citizen.MakeCtizen_ByCC`：普通移民落名后记入 `usedNames`（特殊鼠鼠的名字由 `AddSpecialCitizen` 负责登记，处理器内部对特殊鼠鼠跳过）。
 - 开关：`ModConfig` 新增 `General.CustomNames`（默认 `true`），`CustomMOD.ActiveCustomNames` 只读直读配置。
 - 补丁总数 40 → 43；Debug 构建 0 警告 0 错误；反射冒烟测试确认三个处理器、`NameTableStore`、`ModConfig.CustomNames` 与适配器全部就位，`Data/Names.json` 随构建复制到输出目录。
+
+### 11.7 修复与日志体系（§11.6 之后）
+
+- **修复读档后特殊特性详情空白**（hotrepl 运行时定位）：游戏读档会原地清空 ScriptableObject 特性库中已注册特性的显示字段（`T_Name`/`Description`/`Icon`，效果数值保留）；JSON 化后 `RuntimeTraits` 缓存对象与 DB 条目同引用，`LoadCustomDatas` 重跑时「已存在分支」回填变成自赋值。修复：每次会话从 `SpecialTraitDefinition`（不可变字符串快照）重建全新 `CharacterInfo`，存量存档读档时自愈。
+- **日志体系重构**（对齐 `RatopiaMod.YunQing.All` 的 `ModLog` 风格）：新增 `Core/ModLog.cs`（`Initialize(ManualLogSource)` + Debug/Info/Warn/Error），插件 `Awake` 注入。全部 95 个散落的 `Unity Debug.Log*` 调用收敛为 69 个分级调用点并删除 14 条注释死日志：
+  - **Info（15，关键事件）**：插件启动与补丁安装汇总、特性/单位数据加载与逐单位注册、读档识别特殊鼠鼠与会话恢复完成、招募获得/本体创建、遗体判定、量子电网启动/合并、十万伏特触发、贸易完成统计；
+  - **Debug（29，默认不可见）**：高频运行时细节（电网逐台连接与统计、每笔贸易价格、战斗击退、换装/皮肤细节、候选概率、护栏触发、图片加载）；
+  - **Warn（17，异常与防护）**：配置错误、存档解析失败、防重复触发、发电失败、皮肤部位异常、数据不一致；**Error（8）**：皮肤组合失败、补丁执行失败、登记异常。
+  - 删除纯噪音：幸福度逐 tick、十万伏特检查布尔、电网重建 8 行统计块。

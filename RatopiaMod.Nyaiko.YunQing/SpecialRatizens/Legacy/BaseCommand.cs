@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using SpecialRatizens.Core;
 using UnityEngine;
 
 namespace RatopiaMod
@@ -28,14 +29,12 @@ namespace RatopiaMod
 
             sprite = LoadSpriteFromTexture2D(LoadTextureFromFile(customPath ?? path));
 
-            Debug.Log($"从自定义路径 {path} 加载了图片 {sprite}");
+            ModLog.Debug($"从自定义路径 {path} 加载了图片 {sprite}");
 
             if (sprite == null)
                 sprite = Resources.Load<Sprite>("Missing");
 
             return sprite;
-
-            //Debug.Log(SceneItemEditor.imgPath + pro.ID);
         }
 
         /// <summary>
@@ -81,7 +80,7 @@ namespace RatopiaMod
             }
             else
             {
-                Debug.LogWarning($"load non byte from {fileName}");
+                ModLog.Warn($"load non byte from {fileName}");
 
                 return null;
             }
@@ -114,15 +113,13 @@ namespace RatopiaMod
                 if (File.Exists(path))
                 {
                     bytes = File.ReadAllBytes(path);
-
-                    //Debug.LogWarning(path + " - data length : " + bytes.Length);
                 }
 
                 return bytes;
             }
             catch (Exception ex)
             {
-                Debug.LogWarning(ex);
+                ModLog.Warn(ex.ToString());
 
                 return null;
             }

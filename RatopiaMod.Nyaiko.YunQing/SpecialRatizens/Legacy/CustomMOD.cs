@@ -302,7 +302,7 @@ namespace RatopiaMod
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogWarning($"特殊鼠鼠存档数据解析失败，保底计数按零处理：{ex.Message}");
+                    ModLog.Warn($"特殊鼠鼠存档数据解析失败，保底计数按零处理：{ex.Message}");
                 }
             }
 
@@ -332,7 +332,7 @@ namespace RatopiaMod
                     unit.isUsed = true;
             }
 
-            Debug.LogWarning($"特殊鼠鼠读档恢复完成：已消耗标记 {consumed.Count} 项，保底恢复 {PersistedPity.Count} 项");
+            ModLog.Info($"特殊鼠鼠读档恢复完成：已消耗标记 {consumed.Count} 项，保底恢复 {PersistedPity.Count} 项");
         }
 
         /// <summary>
@@ -411,11 +411,11 @@ namespace RatopiaMod
                 //特殊市民加载
                 if (!TryGetSpecialUnit(citizen, out CustomSpecialUnit unit) || !AddSpecialCitizen(unit, citizen))
                 {
-                    Debug.LogWarning($"加载市民 {citizen.m_UnitName}");
+    
                     continue;
                 }
 
-                Debug.LogWarning($"加载特殊市民 {unit.Name}");
+                ModLog.Info($"读档识别特殊鼠鼠 {unit.Name}");
 
                 if (citizen.m_Power < unit.pow)
                     citizen.m_Power = unit.pow;
@@ -452,7 +452,7 @@ namespace RatopiaMod
                     if (deadNormalizedName.Length > 0 && !SpecialNamePolicy.IsTaken(deadNormalizedName, usedNames))
                         usedNames.Add(deadNormalizedName);
 
-                    Debug.LogWarning($"特殊鼠鼠 {deadUnit.name} 留有遗体，暂不重新出现");
+                    ModLog.Info($"特殊鼠鼠 {deadUnit.name} 留有遗体，暂不重新出现");
                 }
             }
         }
@@ -628,7 +628,7 @@ namespace RatopiaMod
 
             usedNames.Add(_info.Name);
 
-            Debug.Log($"添加了自定义市民 {_info.Name}");
+            ModLog.Debug($"添加了自定义市民 {_info.Name}");
         }
 
         #endregion
@@ -731,7 +731,7 @@ namespace RatopiaMod
                 return;
 
             ProsperityBaselineFailureLogged = true;
-            Debug.LogError($"繁荣等级基线初始化失败：{reason}；本次跳过秦律更新");
+            ModLog.Error($"繁荣等级基线初始化失败：{reason}；本次跳过秦律更新");
         }
         /// <summary>
         /// 加载特性设置
@@ -753,8 +753,6 @@ namespace RatopiaMod
             preValueDic.Clear();
 
             LoadProsperityDB(__instance);
-
-            //Debug.Log("加载特性设置");
         }
 
         /// <summary>
@@ -769,7 +767,7 @@ namespace RatopiaMod
 
             DefaultChar2Count = DBMgr.m_CharacterDB.List_Char2_DB.Count;
 
-            Debug.Log($"已加载 {DefaultChar1Count} 特性1 {DefaultChar2Count} 特性2");
+            ModLog.Info($"已加载 {DefaultChar1Count} 特性1 {DefaultChar2Count} 特性2");
         }
 
         /// <summary>
@@ -808,7 +806,7 @@ namespace RatopiaMod
 
             CustomSpecialUnitRandomGroup.Clear();
 
-            Debug.LogWarning($"共加载 {customInfos.Count} 自定义特性，{customUnits.Count} 自定义单位");
+            ModLog.Info($"共加载 {customInfos.Count} 自定义特性，{customUnits.Count} 自定义单位");
 
             //添加自定义特性
             foreach (CharacterInfo customInfo in customInfos)
@@ -823,14 +821,14 @@ namespace RatopiaMod
 
                 if (!CustomCharacterInfoDatas.TryGetValue(customUnit.char1, out CharacterInfo char1))
                 {
-                    Debug.Log($"自定义单位 {customUnit.name} 特性 {customUnit.char1} 配置错误！");
+                    ModLog.Warn($"自定义单位 {customUnit.name} 特性 {customUnit.char1} 配置错误！");
 
                     continue;
                 }
 
                 if (!CustomCharacterInfoDatas.TryGetValue(customUnit.char2, out CharacterInfo char2))
                 {
-                    Debug.Log($"自定义单位 {customUnit.name} 特性 {customUnit.char2} 配置错误！");
+                    ModLog.Warn($"自定义单位 {customUnit.name} 特性 {customUnit.char2} 配置错误！");
 
                     continue;
                 }
@@ -861,7 +859,7 @@ namespace RatopiaMod
 
                 RegisterCustomCharInfo(char2, customUnit.icon2);
 
-                Debug.LogWarning($"自定义单位 {customUnit.name} 注册完毕，特性1 {char1.T_Name} 特性2 {char2.T_Name}");
+                ModLog.Info($"自定义单位 {customUnit.name} 注册完毕，特性1 {char1.T_Name} 特性2 {char2.T_Name}");
             }
         }
 
@@ -924,8 +922,6 @@ namespace RatopiaMod
                 lastIndex++;
 
                 charList.Add(info);
-
-                //Debug.Log($"已添加 [{info.Index}/{lastIndex}] {info.T_Name} 效果 {info.Description}");
             }
             else
             {
@@ -934,11 +930,7 @@ namespace RatopiaMod
                 list[0].T_Name = info.T_Name;
 
                 list[0].Description = info.Description;
-
-                //Debug.Log($"已更新 [{info.Index}/{lastIndex}] {list[0].T_Name} 效果 ({list[0].EffectValue_A}, {list[0].EffectValue_B}), {list[0].Description}");
             }
-
-            //Debug.Log($"dbList({info.Category}) : {charList.Count}, all : {AllCharInfos.Count}, char1 : {DB_DefaultChar1Count}, char2 : {DB_DefaultChar2Count}");
         }
 
         /// <summary>
@@ -982,8 +974,6 @@ namespace RatopiaMod
 
             sprites[iconKey] = sprite;
             sprites[indexKey] = sprite;
-
-            //Debug.LogWarning($"注册自定义特性 [{info.Index}]{info.T_Name} 图标 {iconKey}/{indexKey} - {sprite.name}({spriteName})");
         }
 
         /// <summary>
@@ -995,7 +985,7 @@ namespace RatopiaMod
         {
             if (unit == null)
             {
-                Debug.LogError($"添加特殊市民 {citizen.m_UnitName} 错误");
+                ModLog.Error($"添加特殊市民 {citizen.m_UnitName} 错误");
 
                 return false;
             }
@@ -1004,7 +994,7 @@ namespace RatopiaMod
 
             if (SpecialCitizens.ContainsKey(unit.Name))
             {
-                Debug.LogWarning($"特殊市民 {citizen.m_UnitName} 已存在！");
+                ModLog.Warn($"特殊市民 {citizen.m_UnitName} 已存在！");
 
                 return false;
             }
@@ -1023,10 +1013,7 @@ namespace RatopiaMod
 
             RegisterCustomSkin(citizen.m_SkinInfo, unit, true);
 
-            Debug.LogWarning($"获得特殊市民 {citizen.m_UnitName}，三维 {GetPDIValue(citizen, 2f)}，特性1 {unit.char_1.T_Name} : {unit.char_1.Description}，特性2 {unit.char_2.T_Name} : {unit.char_2.Description}");
-
-            //Debug.LogWarning($"皮肤 {unit.face.Trim()}/{SpecialCitizenSkins[citizen.m_UnitName]["Face"]} {unit.bread.Trim()}/{SpecialCitizenSkins[citizen.m_UnitName]["Bread"]} {unit.dress.Trim()}/{SpecialCitizenSkins[citizen.m_UnitName]["Dress"]}");
-
+            ModLog.Info($"获得特殊市民 {citizen.m_UnitName}，三维 {GetPDIValue(citizen, 2f)}，特性1 {unit.char_1.T_Name} : {unit.char_1.Description}，特性2 {unit.char_2.T_Name} : {unit.char_2.Description}");
             return true;
         }
 
@@ -1080,7 +1067,7 @@ namespace RatopiaMod
         {
             if (!TryGetCustomCharInfo(name, out CustomCharInfo customInfo))
             {
-                Debug.LogWarning($"{user.m_UnitName} 自定义特性 {name} 获取失败");
+                ModLog.Warn($"{user.m_UnitName} 自定义特性 {name} 获取失败");
 
                 return null;
             }
@@ -1123,7 +1110,7 @@ namespace RatopiaMod
                 : units.First(unit => unit.name.Equals(selected.Name, StringComparison.Ordinal));
 
             if (specialUnit != null)
-                Debug.LogWarning($"出现特殊单位 {specialUnit.name}，当前概率 {specialUnit.RealProbability}/10000");
+                ModLog.Debug($"出现特殊单位 {specialUnit.name}，当前概率 {specialUnit.RealProbability}/10000");
         }
 
         /// <summary>
@@ -1140,7 +1127,7 @@ namespace RatopiaMod
                 // Do not create another citizen whose visible name already exists in this save.
                 if (SpecialNamePolicy.IsTaken(specialUnit.name, Citizens.Select(citizen => citizen.m_UnitName)))
                 {
-                    Debug.LogWarning($"跳过重复特殊鼠鼠名称 {specialUnit.name}");
+                    ModLog.Debug($"跳过重复特殊鼠鼠名称 {specialUnit.name}");
                     specialUnit = null;
                     return true;
                 }
@@ -1159,7 +1146,7 @@ namespace RatopiaMod
 
                 RegisterCustomSkin(__instance.SkinInfo, specialUnit, false);
 
-                Debug.LogWarning($"创建了自定义角色 {__instance.Name}，特性1 [{specialUnit.char_1.Index}]{specialUnit.char_1.T_Name} 特性2 [{specialUnit.char_2.Index}]{specialUnit.char_2.T_Name}");
+                ModLog.Info($"创建了自定义角色 {__instance.Name}，特性1 [{specialUnit.char_1.Index}]{specialUnit.char_1.T_Name} 特性2 [{specialUnit.char_2.Index}]{specialUnit.char_2.T_Name}");
 
                 AudioController.PlayUIOneShot("SFX_UI_Popup_Casting", 1f, false, null);
 
@@ -1273,7 +1260,7 @@ namespace RatopiaMod
 
                 if (info == null)
                 {
-                    Debug.Log($"{_info.Name} 特性 {index} 加载失败！");
+                    ModLog.Warn($"{_info.Name} 特性 {index} 加载失败！");
 
                     continue;
                 }
@@ -1401,9 +1388,9 @@ namespace RatopiaMod
             }
 
             if (bot != null)
-                Debug.LogWarning($"机械 {bot.m_UnitName} 与奥米伽-7连接！");
+                ModLog.Debug($"机械 {bot.m_UnitName} 与奥米伽-7连接！");
             else
-                Debug.LogWarning($"共 {UnitMgr.List_GBot.Count} 机械与奥米伽-7连接！");
+                ModLog.Debug($"共 {UnitMgr.List_GBot.Count} 机械与奥米伽-7连接！");
         }
         /// <summary>
         /// 补满机械鼠电力
@@ -1433,10 +1420,10 @@ namespace RatopiaMod
 
                     bot.SetAniState(AniState.Idle, "Idle_GBot", true, true);
 
-                    Debug.LogWarning($"机械 {bot.m_UnitName} 已倒地！");
+                    ModLog.Debug($"机械 {bot.m_UnitName} 已倒地！");
                 }
 
-                Debug.LogWarning($"机械 {bot.m_UnitName} 通过连接奥米伽-7补充了 {value} 体力！");
+                ModLog.Debug($"机械 {bot.m_UnitName} 通过连接奥米伽-7补充了 {value} 体力！");
 
                 return true;
             }
@@ -1449,7 +1436,7 @@ namespace RatopiaMod
                 {
                     bot.FatigueUpate(10);
 
-                    Debug.LogWarning($"机械 {bot.m_UnitName} 通过连接奥米伽-7补充了 {value} 体力！");
+                    ModLog.Debug($"机械 {bot.m_UnitName} 通过连接奥米伽-7补充了 {value} 体力！");
 
                     return true;
                 }
@@ -1540,7 +1527,7 @@ namespace RatopiaMod
 
             BuildingMgr.RefreshElecUseBuilding();
 
-            Debug.LogWarning($"量子电网已启动！");
+            ModLog.Info($"量子电网已启动！");
         }
         /// <summary>
         /// 合并所有电网
@@ -1556,21 +1543,12 @@ namespace RatopiaMod
                 BuildingMgr.MergeTwoElecLine(elecLineList[0], elecLineList[elecLineList.Count - 1]);
             }
 
-            Debug.Log($"超级电网合并完成，共合并 {count} 电网");
+            ModLog.Info($"超级电网合并完成，共合并 {count} 电网");
 
             if (count == 0)
                 return;
 
             SuperElecLine = elecLineList[0];
-
-            Debug.Log($"总设备数量：{SuperElecLine.List_ID.Count}");
-            Debug.Log($"电池数量：{SuperElecLine.Dic_Storage.Count}");
-            Debug.Log($"发电机数量：{SuperElecLine.Dic_Dynamo.Count}");
-            Debug.Log($"耗电设备数量：{SuperElecLine.Dic_UseBuild.Count}");
-            Debug.Log($"当前电力：{SuperElecLine.m_Watt}");
-            Debug.Log($"最大电力：{SuperElecLine.m_MaxWatt}");
-            Debug.Log($"每小产出：{SuperElecLine.m_MakeWatt}");
-            Debug.Log($"每小时消耗：{SuperElecLine.m_HourUseWatt}");
         }
         /// <summary>
         /// 基类建筑电路检查
@@ -1640,7 +1618,7 @@ namespace RatopiaMod
 
                     __result = true;
 
-                    Debug.LogWarning($"{__instance.m_CustomName} 处于电网范围外，已单独加入超级电网！");
+                    ModLog.Debug($"{__instance.m_CustomName} 处于电网范围外，已单独加入超级电网！");
                 }
             }
         }
@@ -1654,9 +1632,6 @@ namespace RatopiaMod
                 return true;
 
             __result = new List<ElecLine_Info> { SuperElecLine };
-
-            //Debug.LogWarning($"端口 {_port.m_PortType} 获取超级电网");
-
             return false;
         }
         /// <summary>
@@ -1685,7 +1660,7 @@ namespace RatopiaMod
 
             List<int> list = (elecLine != null) ? elecLine.FindAnotherStorageList(_id) : new List<int>() { };
 
-            Debug.LogWarning($"({_id}) 所在电网 {(elecLine != null ? elecLine.m_CustomName : "无")} 与 {list.Count} 电池相连，触发删除检测，当前共 {BuildingMgr.List_ElecInfo.Count} 电网");
+            ModLog.Debug($"({_id}) 所在电网 {(elecLine != null ? elecLine.m_CustomName : "无")} 与 {list.Count} 电池相连，触发删除检测，当前共 {BuildingMgr.List_ElecInfo.Count} 电网");
 
             //CombineAllElecLine();
 
@@ -1708,8 +1683,6 @@ namespace RatopiaMod
             costRatio = costRatio < 0f ? 0f : costRatio;
 
             _value *= costRatio;
-
-            //Debug.Log($"量子电网消耗减免 {1 - costRatio}，消耗值 {_value}");
         }
 
         /// <summary>
@@ -1738,7 +1711,7 @@ namespace RatopiaMod
                 UpdateSpecialStateToUnit(Citizens[i], C_Buff.SpdUp, key, value, Citizens[i] == citizen, true, time == 0 ? 1 : time);
             }
 
-            Debug.Log($"{citizen.m_UnitName} 溢出电力 {overflowPower} 获得状态 {info.T_Name}");
+            ModLog.Debug($"{citizen.m_UnitName} 溢出电力 {overflowPower} 获得状态 {info.T_Name}");
         }
         /// <summary>
         /// 十万伏特
@@ -1753,7 +1726,7 @@ namespace RatopiaMod
             int value = IntProbability;
             float thrValue = (citizen.m_Power + citizen.m_Int) * info.value1;
 
-            Debug.Log($"十万伏特检查 {value <= thrValue}({value} {thrValue})");
+
 
             //十万伏特
             if (value > thrValue)
@@ -1765,7 +1738,7 @@ namespace RatopiaMod
             ElecLine_Info elecLine_Info = GameMgr.Instance._BuildingMgr.SearchElecInfo(building.m_ID);
             if (elecLine_Info == null)
             {
-                Debug.LogWarning($"皮卡丘发电失败：建筑 {building.m_CustomName} 未连接电网");
+                ModLog.Warn($"皮卡丘发电失败：建筑 {building.m_CustomName} 未连接电网");
                 return;
             }
 
@@ -1779,7 +1752,7 @@ namespace RatopiaMod
             "Value"
             });
 
-            Debug.LogWarning($"皮卡丘触发了{ratio}倍十万伏特，产生了 {power} 电力");
+            ModLog.Info($"皮卡丘触发了{ratio}倍十万伏特，产生了 {power} 电力");
 
             PKQ_DQCD_Effect(citizen, overflowPower);
 
@@ -1790,7 +1763,7 @@ namespace RatopiaMod
 
                 building.SetNeedRepair(true);
 
-                Debug.LogWarning($"皮卡丘的十万伏特损坏了建筑 {building.m_CustomName}");
+                ModLog.Warn($"皮卡丘的十万伏特损坏了建筑 {building.m_CustomName}");
             }
         }
         /// <summary>
@@ -1814,14 +1787,14 @@ namespace RatopiaMod
             if (worker == null)
                 return;
 
-            Debug.Log($"{building.m_Info.T_Name}({building.m_Info.Name}) 完成工作 {d_time}");
+            ModLog.Debug($"{building.m_Info.T_Name}({building.m_Info.Name}) 完成工作 {d_time}");
 
             //皮卡丘在鼠力发电站完成工作时
             if (building.m_Info.Name == BuildingName.ManpowerGenerator && CitizenIsSpecialUnit(worker, "皮卡丘") && CustomCharInfoIsActive("PKQ_SWFT", out _))
             {
                 PKQ_SWFT_Effect(worker, building as Building_ThermalGenerator);
 
-                Debug.LogWarning($"{building.m_Info.T_Name}({building.m_Info.Name})({building.GetType()}/{building is Building_ThermalGenerator}) {worker.m_UnitName}完成了发电工作 {d_time}，当前力量经验 {worker.m_PowerExp}");
+                ModLog.Debug($"{building.m_Info.T_Name}({building.m_Info.Name})({building.GetType()}/{building is Building_ThermalGenerator}) {worker.m_UnitName}完成了发电工作 {d_time}，当前力量经验 {worker.m_PowerExp}");
             }
         }
 
@@ -1839,7 +1812,7 @@ namespace RatopiaMod
             //减少50%移速
             UpdateSpecialStateToUnit(unit, C_Buff.SpdDown, "QTSPQ", 0.5f);
 
-            Debug.Log($"{citizen.name} 击退了 {unit.name}");
+            ModLog.Debug($"{citizen.name} 击退了 {unit.name}");
         }
         /// <summary>
         /// 龙胆
@@ -1858,7 +1831,7 @@ namespace RatopiaMod
             UpdateSpecialStateToUnit(citizen, C_Buff.SpdUp, key, info.EffectValue_A);
             UpdateSpecialStateToUnit(citizen, C_Buff.Dodge, key, info.EffectValue_B, false, false);
 
-            Debug.Log($"{citizen.m_UnitName} 获得状态 {info.T_Name}");
+            ModLog.Debug($"{citizen.m_UnitName} 获得状态 {info.T_Name}");
         }
 
         /// <summary>
@@ -1890,9 +1863,6 @@ namespace RatopiaMod
         {
             if (!CustomCharInfoIsActive("DZ_MGZL"))
                 return;
-
-            //Debug.Log($"{__instance.m_UnitName} 使用了 {t_info.T_Name}({t_info.m_TileType})");
-
             int time = 0;
 
             if (t_info.m_TileType == TileType.Mushroom)
@@ -2072,7 +2042,7 @@ namespace RatopiaMod
 
             if (____info == null)
             {
-                Debug.LogWarning("贸易物品获取失败！");
+                ModLog.Warn("贸易物品获取失败！");
 
                 return true;
             }
@@ -2089,7 +2059,7 @@ namespace RatopiaMod
 
             __result = baseValue * value;
 
-            Debug.Log($"{____info.T_Name} 进口原价为 {baseValue} 最终进口价格为 {__result}，影响系数为 {value}");
+            ModLog.Debug($"{____info.T_Name} 进口原价为 {baseValue} 最终进口价格为 {__result}，影响系数为 {value}");
 
             return false;
         }
@@ -2107,7 +2077,7 @@ namespace RatopiaMod
 
             if (____info == null)
             {
-                Debug.LogWarning("贸易物品获取失败！");
+                ModLog.Warn("贸易物品获取失败！");
                 return true;
             }
 
@@ -2123,7 +2093,7 @@ namespace RatopiaMod
 
             __result = baseValue * value;
 
-            Debug.Log($"{____info.T_Name} 出口原价为 {baseValue} 最终出口价格为 {__result}，影响系数为 {value}");
+            ModLog.Debug($"{____info.T_Name} 出口原价为 {baseValue} 最终出口价格为 {__result}，影响系数为 {value}");
 
             return false;
         }
@@ -2155,7 +2125,7 @@ namespace RatopiaMod
 
             priceIsUpdateBySS = value == 0 ? -1 : value > 0 ? 0 : 1;
 
-            Debug.Log($"当前季节 {WeatherMgr.m_SeasonState} 贸易物品 {info.T_Name} 价格浮动 {value}({ssValue})");
+            ModLog.Debug($"当前季节 {WeatherMgr.m_SeasonState} 贸易物品 {info.T_Name} 价格浮动 {value}({ssValue})");
 
             return value;
         }
@@ -2219,7 +2189,7 @@ namespace RatopiaMod
             else
                 CountryCommercialityDatas[country.Key] = remainingValue;
 
-            Debug.LogWarning($"贸易完成，贸易价值 {value} 增长系数 {factorValue.ToString("f4")}，目标城市 {country.Name} 获得 {comAddValue}(累计 {comValue} - 消耗 {comValueGrowthThreshold * addValue} = 剩余 {remainingValue}) 商业值，繁荣提升了 {addValue} 点");
+            ModLog.Info($"贸易完成，贸易价值 {value} 增长系数 {factorValue.ToString("f4")}，目标城市 {country.Name} 获得 {comAddValue}(累计 {comValue} - 消耗 {comValueGrowthThreshold * addValue} = 剩余 {remainingValue}) 商业值，繁荣提升了 {addValue} 点");
         }
         /// <summary>
         /// 获得商业值增长系数
@@ -2270,7 +2240,7 @@ namespace RatopiaMod
             //    country
             //}
 
-            Debug.LogWarning($"DiplomaticData: 设置目标城市 {tInstance.ID} 距离 {newDis}/{dis}");
+            ModLog.Debug($"DiplomaticData: 设置目标城市 {tInstance.ID} 距离 {newDis}/{dis}");
         }
 
         /// <summary>
@@ -2349,7 +2319,7 @@ namespace RatopiaMod
 
             citizen.Heal(healValue, true);
 
-            Debug.Log($"{citizen.name} 攻击了 {name}，造成 {-dmg} 伤害，恢复 {healValue} 生命");
+            ModLog.Debug($"{citizen.name} 攻击了 {name}，造成 {-dmg} 伤害，恢复 {healValue} 生命");
         }
 
         /// <summary>
@@ -2429,7 +2399,7 @@ namespace RatopiaMod
                 else if (qtspq)
                     ZY_QTSPQ_Effect(__instance, targetUnit, qtspqInfo);
 
-                Debug.Log($"{__instance.name} 攻击了 {targetUnit.name}({targetUnit.GetType()})");
+                ModLog.Debug($"{__instance.name} 攻击了 {targetUnit.name}({targetUnit.GetType()})");
             }
         }
 
@@ -2605,7 +2575,7 @@ namespace RatopiaMod
 
             result = result < minNum ? minNum : result;
 
-            Debug.Log($"{__instance.m_UnitName} 当前幸福 {happy} 产量 {result}");
+
 
             CreateTileObj(TileType.Gold, __instance.GetPos(), result);
         }
@@ -2691,8 +2661,6 @@ namespace RatopiaMod
         /// <param name="__instance"></param>
         public static void BuffIcon_IconSet(BuffIcon __instance, BuffInfo _info)
         {
-            //Debug.Log($"{_info.T_Name} / {_info.ReferenceName}");
-
             if (!ActiveCustomSpecialUnit ||
                 !TryGetCustomCharInfo(_info.ReferenceName, out CustomCharInfo customInfo))
                 return;
@@ -2700,8 +2668,6 @@ namespace RatopiaMod
             _info.T_Name = _info.ReferenceName;
 
             __instance.m_Spr.sprite = Func.Instance.LoadSprite(customInfo.iconKey);
-
-            //Debug.Log($"加载了特殊状态 {_info.ReferenceName} 图标 {customInfo.iconKey}");
         }
 
         /// <summary>
@@ -2808,7 +2774,7 @@ namespace RatopiaMod
                     {
                         customUnit = keyValue.Value;
 
-                        Debug.LogWarning($"市民 {customUnit.name} 是特殊单位 ，特性1 {customUnit.char_1.Name}/{keyValue.Value.char1}，特性2 {customUnit.char_2.Name}/{keyValue.Value.char2}");
+                        ModLog.Warn($"市民 {customUnit.name} 是特殊单位 ，特性1 {customUnit.char_1.Name}/{keyValue.Value.char1}，特性2 {customUnit.char_2.Name}/{keyValue.Value.char2}");
 
                         return true;
                     }
@@ -2964,9 +2930,6 @@ namespace RatopiaMod
             //奥米伽不会受到致死伤害
             if (CitizenHaveCharacterInfo(__instance, "AMJ7_LZJX", out _))
                 dmg = __instance.m_CurHP + dmg <= 0 ? 0 : dmg;
-
-            //Debug.Log($"{__instance.m_UnitName} 受到 {value}->{dmg} 伤害，状态 {__instance.m_CharState}，来源 {_tag}，华佗在世 {CustomCharInfoIsUsed("HT_SYZS")}");
-
             return true;
         }
 
@@ -3000,7 +2963,7 @@ namespace RatopiaMod
             if (!UpdateClothes(__instance))
                 return true;
 
-            Debug.Log($"单位 {__instance.m_UnitName} 更新了默认服装");
+            ModLog.Debug($"单位 {__instance.m_UnitName} 更新了默认服装");
 
             return false;
         }
@@ -3016,9 +2979,6 @@ namespace RatopiaMod
             //非工作时
             if (num != 0 || !UpdateClothes(__instance))
                 return true;
-
-            //Debug.Log($"单位 {__instance.m_UnitName} 更新了服装");
-
             return false;
         }
 
@@ -3044,7 +3004,7 @@ namespace RatopiaMod
                 true,
                 customSkin);
 
-            Debug.Log($"特殊单位 {specialUnit.Name} {(updated ? "更新" : "恢复")}了服装");
+            ModLog.Debug($"特殊单位 {specialUnit.Name} {(updated ? "更新" : "恢复")}了服装");
             return updated;
         }
         /// <summary>
@@ -3058,7 +3018,7 @@ namespace RatopiaMod
 
             SpecialCitizenSkins[key] = new Dictionary<string, string>() { { "Skin", unit.skin.Trim() }, { "Face", unit.face.Trim() }, { "Bread", unit.bread.Trim() }, { "Dress", unit.dress.Trim() }, { "Glasses", unit.glasses.Trim() }, { "Hair", unit.hair.Trim() }, { "Hat", unit.hat.Trim() }, { "Makeup", unit.makeup.Trim() } };
 
-            Debug.Log($"特殊皮肤 {key} 注册：实际模板性别 {gender}");
+            ModLog.Debug($"特殊皮肤 {key} 注册：实际模板性别 {gender}");
 
             UpdateUnitSpineDress(skinInfo, key, gender, null, true, SpecialCitizenSkins[key], applyToSkeleton);
         }
@@ -3098,9 +3058,6 @@ namespace RatopiaMod
                 string pair = SkinPairCorrection(gender, customPair.Key, customPair.Value, havePermanent, jobPairs);
 
                 templete.Pairs[index] = SpineDresserPair.Create(customPair.Key, pair);
-
-                //Debug.Log($"{key} 更新了部位[{index}] {customPair.Key} 为 {pair} <= {customPair.Value} ");
-
                 index++;
             }
 
@@ -3122,7 +3079,7 @@ namespace RatopiaMod
                     }
                 }
 
-                Debug.LogWarning($"{key} 更新了皮肤");
+                ModLog.Debug($"{key} 更新了皮肤");
 
                 //SetPrivateValue(bundle, "_elements", bundle.Elements);
             }
@@ -3134,7 +3091,7 @@ namespace RatopiaMod
                 SetPrivateValue(bundle, "_elements", bundle.Elements.AddToArray(element));
             }
             
-            Debug.Log($"{key} {(isAdd ? "添加" : "更新")}了皮肤，当前共有 {bundle.Elements.Length} 个皮肤");
+            ModLog.Debug($"{key} {(isAdd ? "添加" : "更新")}了皮肤，当前共有 {bundle.Elements.Length} 个皮肤");
 
             // && !CitizenCaveUI.Obj_Main.activeSelf
 
@@ -3165,7 +3122,7 @@ namespace RatopiaMod
                     //存在该部位且有配置时
                     if (pair.Category.Equals(key) && !pair.Skin.Equals(""))
                     {
-                        Debug.LogWarning($"部位 {pair.Category} 使用了职业皮肤 {pair.Skin}");
+                        ModLog.Debug($"部位 {pair.Category} 使用了职业皮肤 {pair.Skin}");
 
                         return pair.Skin;
                     }
@@ -3242,7 +3199,7 @@ namespace RatopiaMod
                 if (isCitizen)
                     RecoverUnitSkin(skinInfo, skinSnapshot, overrideSnapshot, key, $"缺少 {gender} 模板", applyToSkeleton);
                 else
-                    Debug.LogError($"特殊皮肤 {key} 组合失败：缺少 {gender} 模板");
+                    ModLog.Error($"特殊皮肤 {key} 组合失败：缺少 {gender} 模板");
 
                 return false;
             }
@@ -3289,12 +3246,12 @@ namespace RatopiaMod
             RenderCombinedSkin(skinInfo, applyToSkeleton);
 
             string recoveryName = recovery == SkinRecoveryKind.Snapshot ? "原外观" : "原版默认外观";
-            Debug.LogError($"特殊皮肤 {key} 组合失败：{reason}；已使用 {recoveryName} 恢复");
+            ModLog.Error($"特殊皮肤 {key} 组合失败：{reason}；已使用 {recoveryName} 恢复");
 
             if (!SkinRepairPolicy.HasRequiredAppearance(skinInfo.SkinDic))
             {
                 string missing = string.Join(",", SkinRepairPolicy.MissingRequiredCategories(skinInfo.SkinDic));
-                Debug.LogError($"特殊皮肤 {key} 恢复后仍缺少关键部件：{missing}");
+                ModLog.Error($"特殊皮肤 {key} 恢复后仍缺少关键部件：{missing}");
             }
         }
 
@@ -3457,7 +3414,7 @@ class CustomCharInfo
         {
             user = value;
 
-            Debug.Log($"{user.m_UnitName} 启用了特性 {t_name}");
+            ModLog.Debug($"{user.m_UnitName} 启用了特性 {t_name}");
         }
     }
 

@@ -60,7 +60,7 @@ namespace SpecialRatizens.Core
 
                 if (!File.Exists(path))
                 {
-                    Debug.LogWarning($"特殊鼠鼠姓名表不存在，相关功能将使用空表：{path}");
+                    ModLog.Warn($"特殊鼠鼠姓名表不存在，相关功能将使用空表：{path}");
                     return;
                 }
 
@@ -68,7 +68,7 @@ namespace SpecialRatizens.Core
 
                 if (table == null)
                 {
-                    Debug.LogWarning($"特殊鼠鼠姓名表为空：{path}");
+                    ModLog.Warn($"特殊鼠鼠姓名表为空：{path}");
                     return;
                 }
 
@@ -78,14 +78,14 @@ namespace SpecialRatizens.Core
                 _maleOneChar = table.MaleOneChar ?? Empty;
                 _maleTwoChar = table.MaleTwoChar ?? Empty;
 
-                Debug.Log(
+                ModLog.Info(
                     $"特殊鼠鼠姓名表加载完成：姓氏 {_surNames.Length}，" +
                     $"女名 {_femaleOneChar.Length}/{_femaleTwoChar.Length}，" +
                     $"男名 {_maleOneChar.Length}/{_maleTwoChar.Length}");
             }
             catch (Exception error)
             {
-                Debug.LogWarning($"特殊鼠鼠姓名表加载失败，相关功能将使用空表：{error}");
+                ModLog.Warn($"特殊鼠鼠姓名表加载失败，相关功能将使用空表：{error}");
             }
         }
 

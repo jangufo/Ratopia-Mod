@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using BepInEx.Logging;
 using CasselGames.Diplomatic;
 using CasselGames.Diplomatic.Data;
 using CasselGames.Diplomatic.UI;
 using HarmonyLib;
 using RatopiaMod;
+using SpecialRatizens.Core;
 using UnityEngine;
 
 namespace SpecialRatizens.Patching
@@ -19,7 +19,7 @@ namespace SpecialRatizens.Patching
 
         public static IReadOnlyList<PatchDescriptor> Descriptors => Items;
 
-        public static void InstallAll(Harmony harmony, ManualLogSource logger)
+        public static void InstallAll(Harmony harmony)
         {
             if (harmony == null)
             {
@@ -28,10 +28,10 @@ namespace SpecialRatizens.Patching
 
             foreach (var descriptor in Items)
             {
-                logger.LogDebug($"正在安装 Harmony 补丁：{descriptor.Name}");
                 descriptor.Apply(harmony);
-                logger.LogDebug($"Harmony 补丁安装完成：{descriptor.Name}");
             }
+
+            ModLog.Info($"已安装 {Items.Count} 个 Harmony 补丁");
         }
 
         private static List<PatchDescriptor> BuildDescriptors()

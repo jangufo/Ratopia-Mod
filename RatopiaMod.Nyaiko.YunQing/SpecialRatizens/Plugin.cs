@@ -26,6 +26,7 @@ namespace SpecialRatizens
         private void Awake()
         {
             Instance = this;
+            ModLog.Initialize(Logger);
 
             try
             {
@@ -36,9 +37,9 @@ namespace SpecialRatizens
 
                 CustomMOD.ConfigureSpecialRatizens(dataRoot, catalog);
                 _harmony = new Harmony(PluginGuid);
-                PatchRegistry.InstallAll(_harmony, Logger);
+                PatchRegistry.InstallAll(_harmony);
                 _patchingSucceeded = true;
-                Logger.LogInfo(
+                ModLog.Info(
                     $"{PluginName} v{PluginVersion} 已加载：{catalog.Ratizens.Count} 名特殊鼠鼠、{catalog.Traits.Count} 个特性；" +
                     $"功能当前{(Enabled ? "开启" : "关闭")}。");
             }
@@ -47,7 +48,7 @@ namespace SpecialRatizens
                 _patchingSucceeded = false;
                 _harmony?.UnpatchSelf();
                 CustomMOD.ResetSpecialRatizensSession();
-                Logger.LogError($"特殊鼠鼠初始化失败，已回滚全部补丁并停用：{error}");
+                ModLog.Error($"特殊鼠鼠初始化失败，已回滚全部补丁并停用：{error}");
             }
         }
 
@@ -59,7 +60,7 @@ namespace SpecialRatizens
             }
             catch (Exception error)
             {
-                Logger.LogWarning($"清理特殊鼠鼠运行时状态失败：{error}");
+                ModLog.Warn($"清理特殊鼠鼠运行时状态失败：{error}");
             }
 
             _harmony?.UnpatchSelf();
@@ -84,13 +85,13 @@ namespace SpecialRatizens
             }
             catch (Exception error)
             {
-                plugin.Logger.LogError($"特殊鼠鼠补丁 {operation} 执行失败，已隔离异常：{error}");
+                ModLog.Error($"特殊鼠鼠补丁 {operation} 执行失败，已隔离异常：{error}");
             }
         }
 
         internal static void LogPatchError(string operation, Exception error)
         {
-            Instance?.Logger.LogError($"特殊鼠鼠补丁 {operation} 执行失败，已回退原版行为：{error}");
+            ModLog.Error($"特殊鼠鼠补丁 {operation} 执行失败，已回退原版行为：{error}");
         }
     }
 }
