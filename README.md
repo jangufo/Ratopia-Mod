@@ -8,10 +8,19 @@
 
 GitHub Release 提供两类包：
 
-- **单个 Mod 包**：例如 `RatopiaMod.YunQing.All-v3.0.0.zip`，只包含一个 Mod。
-- **全 Mod 集合包**：文件名为 `Ratopia-Mod-<时间戳>.zip`，时间戳随构建时间自动生成，包含仓库中全部最新 Mod。
+游戏原始文件有`MonoBleedingEdge` `Ratopia_Data` `Ratopia.exe` `UnityCrashHandler64.exe` `UnityPlayer.dll`
 
-安装时将发布包直接解压到 Ratopia 游戏根目录，保持 ZIP 内目录结构不变。单个 Mod 的详细安装、卸载、兼容性和存档说明见对应项目目录下的 `README.md`。
+先下载[BepInEx_win_x64_5.4.23.5](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5)
+解压到根目录
+
+解压后游戏根目录多了`BepInEx` `.doorstop_version` `doorstop_config.ini` `winhttp.dll`四个
+
+注意`winhttp.dll`容易被杀毒软件杀掉，注意查看是否还在
+
+- **单个 Mod 包**：例如 `RatopiaMod.YunQing.All-v3.0.0.zip`，只包含一个 Mod。
+- **全 Mod 集合包**：文件名为 `Ratopia-Mod-<时间戳>.zip`，时间戳随构建时间自动生成，包含仓库中全部最新 Mod，只用下载最新的
+
+mod是安装到RATOPIA_DIR\BepInEx\plugins文件夹下，每一个文件夹都是一个mod，看哪个不想要删掉就好
 
 ## 开发配置
 
